@@ -1,55 +1,69 @@
+"use client";
+import { useState, useEffect } from "react";
+
 export default function Home() {
-  const flashProducts = [
-    { id: 1, name: "Wireless Earbuds", price: 1299, oldPrice: 2999, image: "https://via.placeholder.com/200" },
-    { id: 2, name: "Smart Watch", price: 2499, oldPrice: 5999, image: "https://via.placeholder.com/200" },
-    { id: 3, name: "Backpack", price: 899, oldPrice: 1999, image: "https://via.placeholder.com/200" },
-    { id: 4, name: "Hair Dryer", price: 1599, oldPrice: 3500, image: "https://via.placeholder.com/200" },
+  const [current, setCurrent] = useState(0);
+
+  const banners = [
+    "https://via.placeholder.com/1200x300/007bff/ffffff?text=HOT+DEALS+UPTO+60%+OFF",
+    "https://via.placeholder.com/1200x300/ff6a00/ffffff?text=UNILEVER+DHAKA+DEAL",
+    "https://via.placeholder.com/1200x300/28a745/ffffff?text=FREE+DELIVERY+NATIONWIDE"
   ];
+
+  const categories = [
+    { name: "Bath & Decor", icon: "🛁" }, { name: "Kitchen Storage", icon: "🍳" },
+    { name: "Home Decoration", icon: "🏠" }, { name: "Books", icon: "📚" },
+    { name: "Watches", icon: "⌚" }, { name: "Toddler", icon: "🧸" },
+    { name: "Food", icon: "🍔" }, { name: "Pets", icon: "🐶" },
+  ];
+
+  const products = Array(12).fill(null).map((_, i) => ({
+    id: i, name: `BAHARAZ Product ${i+1}`, price: 599 + i*100, oldPrice: 1200 + i*100, image: "https://via.placeholder.com/200"
+  }));
+
+  useEffect(() => {
+    const timer = setInterval(() => setCurrent((prev) => (prev + 1) % banners.length), 3000);
+    return () => clearInterval(timer);
+  }, []);
 
   return (
     <div className="bg-gray-100">
-      {/* Top Bar */}
-      <div className="bg-orange-600 text-white text-xs">
-        <div className="max-w-7xl mx-auto px-4 py-2 flex justify-end gap-6">
-          <a href="#">SAVE MORE ON APP</a>
-          <a href="#">BECOME A SELLER</a>
-          <a href="#">HELP & SUPPORT</a>
-          <a href="#">LOGIN</a>
-          <a href="#">SIGN UP</a>
-        </div>
-      </div>
-
-      {/* Main Navbar */}
-      <nav className="bg-orange-500 sticky top-0 z-50">
+      {/* Navbar - WHITE */}
+      <nav className="bg-white sticky top-0 z-50 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 py-3 flex items-center gap-4">
-          <h1 className="text-3xl font-bold text-white">BAHARAZ</h1>
-          <input type="text" placeholder="Search in BAHARAZ" className="flex-1 rounded px-4 py-2" />
-          <div className="text-white text-2xl">🛒</div>
+          <h1 className="text-3xl font-bold text-orange-500">BAHARAZ</h1>
+          <input type="text" placeholder="Search in BAHARAZ" className="flex-1 rounded border px-4 py-2" />
+          <button className="text-2xl">🛒</button>
         </div>
       </nav>
 
-      {/* Banner */}
-      <div className="bg-gradient-to-r from-orange-400 to-yellow-400 py-10">
-        <div className="max-w-7xl mx-auto px-4 bg-yellow-300 rounded-lg p-6 flex items-center justify-between">
-          <div>
-            <h2 className="text-4xl font-bold text-red-600">PAYDAY SALE</h2>
-            <p className="text-sm">18(8PM) - 31 AUG</p>
-            <p className="text-xl font-bold mt-2">UP TO 80% OFF + FREE DELIVERY</p>
-          </div>
-          <button className="bg-red-600 text-white px-6 py-3 rounded-lg font-bold">SHOP NOW</button>
+      {/* Banner Slider */}
+      <div className="max-w-7xl mx-auto px-4 py-4">
+        <img src={banners[current]} className="rounded-lg w-full shadow" alt="banner" />
+      </div>
+
+      {/* Categories */}
+      <div className="max-w-7xl mx-auto px-4 py-6 bg-white rounded-lg shadow">
+        <h2 className="text-xl font-bold mb-4">Categories</h2>
+        <div className="grid grid-cols-4 md:grid-cols-8 gap-4">
+          {categories.map(c => (
+            <div key={c.name} className="text-center cursor-pointer hover:text-orange-500">
+              <div className="text-4xl">{c.icon}</div>
+              <p className="text-xs mt-1">{c.name}</p>
+            </div>
+          ))}
         </div>
       </div>
 
-      {/* Flash Sale */}
+      {/* Just For You */}
       <div className="max-w-7xl mx-auto px-4 py-8">
-        <h2 className="text-2xl font-bold mb-2">Flash Sale</h2>
-        <p className="text-red-500 mb-4">On Sale Now</p>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {flashProducts.map(p => (
-            <div key={p.id} className="bg-white rounded-lg shadow p-3">
+        <h2 className="text-2xl font-bold mb-4">Just For You</h2>
+        <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
+          {products.map(p => (
+            <div key={p.id} className="bg-white rounded-lg shadow p-2 hover:shadow-lg">
               <img src={p.image} alt={p.name} />
-              <h3 className="font-semibold mt-2 text-sm">{p.name}</h3>
-              <p className="text-red-600 font-bold">৳{p.price}</p>
+              <h3 className="font-semibold mt-1 text-xs">{p.name}</h3>
+              <p className="text-red-600 font-bold text-sm">৳{p.price}</p>
               <p className="text-gray-400 line-through text-xs">৳{p.oldPrice}</p>
             </div>
           ))}
