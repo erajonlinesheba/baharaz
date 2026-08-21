@@ -5,29 +5,32 @@ export default function Home() {
   const [current, setCurrent] = useState(0);
   const [cart, setCart] = useState([]);
   const [showCart, setShowCart] = useState(false);
+  const [showCheckout, setShowCheckout] = useState(false);
+  const [showLogin, setShowLogin] = useState(false);
+  const [user, setUser] = useState(null);
+  const [orders, setOrders] = useState([]);
 
   const banners = [
-    { title: "PAYDAY MEGA SALE", subtitle: "18 Aug - 31 Aug | Free Delivery", discount: "UP TO 80% OFF", bg: "from-orange-500 via-red-500 to-pink-600", img: "https://images.unsplash.com/photo-1555529669-ebe57ecb89fe?q=80&w=1200" },
-    { title: "COOK SMART", subtitle: "Kitchen Essentials", discount: "UP TO 50% OFF", bg: "from-purple-600 via-pink-500 to-orange-500", img: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?q=80&w=1200" },
-    { title: "NEW ARRIVALS", subtitle: "Latest Fashion & Gadgets", discount: "UP TO 60% OFF", bg: "from-blue-500 via-purple-500 to-pink-500", img: "https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?q=80&w=1200" }
+    { title: "2026 MEGA SALE", subtitle: "Experience The Future of Shopping", discount: "UP TO 80% OFF", bg: "from-fuchsia-600 via-purple-600 to-blue-600", img: "https://images.unsplash.com/photo-1555529669-ebe57ecb89fe?q=80&w=1200" },
+    { title: "NEON TECH DROP", subtitle: "Latest Gadgets with RGB Lights", discount: "UP TO 60% OFF", bg: "from-cyan-500 via-blue-500 to-purple-600", img: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?q=80&w=1200" },
   ];
 
   const categories = [
-    { name: "Fashion", icon: "👗", color: "bg-pink-100" }, { name: "Electronics", icon: "📱", color: "bg-blue-100" },
-    { name: "Home", icon: "🏠", color: "bg-green-100" }, { name: "Beauty", icon: "💄", color: "bg-purple-100" },
-    { name: "Groceries", icon: "🛒", color: "bg-yellow-100" }, { name: "Sports", icon: "⚽", color: "bg-orange-100" },
-    { name: "Toys", icon: "🧸", color: "bg-red-100" }, { name: "Books", icon: "📚", color: "bg-indigo-100" },
+    { name: "Fashion", icon: "👗", color: "from-pink-400 to-rose-400" },
+    { name: "Electronics", icon: "📱", color: "from-blue-400 to-cyan-400" },
+    { name: "Home", icon: "🏠", color: "from-green-400 to-emerald-400" },
+    { name: "Beauty", icon: "💄", color: "from-purple-400 to-fuchsia-400" },
+    { name: "Groceries", icon: "🛒", color: "from-yellow-400 to-orange-400" },
+    { name: "Sports", icon: "⚽", color: "from-orange-400 to-red-400" },
+    { name: "Toys", icon: "🧸", color: "from-red-400 to-pink-400" },
+    { name: "Books", icon: "📚", color: "from-indigo-400 to-blue-400" },
   ];
 
   const products = [
-    { id: 1, name: "Smart Watch X8 Pro", price: 1299, oldPrice: 2500, img: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=400", rating: 4.8, sold: 240 },
-    { id: 2, name: "Bluetooth Earbuds", price: 899, oldPrice: 1800, img: "https://images.unsplash.com/photo-1590658268037-6bf12165a8df?q=80&w=400", rating: 4.6, sold: 180 },
-    { id: 3, name: "Kitchen Mixer Grinder", price: 2499, oldPrice: 4000, img: "https://images.unsplash.com/photo-1589984662646-e7b2e4962f18?q=80&w=400", rating: 4.9, sold: 120 },
-    { id: 4, name: "Men's Casual Shirt", price: 699, oldPrice: 1200, img: "https://images.unsplash.com/photo-1598033129183-c4f50c736f7d?q=80&w=400", rating: 4.5, sold: 300 },
-    { id: 5, name: "Women's Handbag", price: 1199, oldPrice: 2200, img: "https://images.unsplash.com/photo-1591561954557-26941169b49e?q=80&w=400", rating: 4.7, sold: 150 },
-    { id: 6, name: "Gaming Mouse RGB", price: 799, oldPrice: 1500, img: "https://images.unsplash.com/photo-1615666662877-1e7f5b1a5e8c?q=80&w=400", rating: 4.8, sold: 200 },
-    { id: 7, name: "Wall Decor Frame", price: 499, oldPrice: 999, img: "https://images.unsplash.com/photo-1618220179428-22790b461013?q=80&w=400", rating: 4.4, sold: 90 },
-    { id: 8, name: "Skincare Combo Pack", price: 1599, oldPrice: 3000, img: "https://images.unsplash.com/photo-1556228720-195a672e8a03?q=80&w=400", rating: 4.9, sold: 110 },
+    { id: 1, name: "Smart Watch X9 Ultra", price: 1299, oldPrice: 2500, img: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=400", rating: 4.8, sold: 240 },
+    { id: 2, name: "RGB Gaming Headset", price: 899, oldPrice: 1800, img: "https://images.unsplash.com/photo-1590658268037-6bf12165a8df?q=80&w=400", rating: 4.6, sold: 180 },
+    { id: 3, name: "Smart Air Fryer", price: 2499, oldPrice: 4000, img: "https://images.unsplash.com/photo-1589984662646-e7b2e4962f18?q=80&w=400", rating: 4.9, sold: 120 },
+    { id: 4, name: "Premium Hoodie 2026", price: 699, oldPrice: 1200, img: "https://images.unsplash.com/photo-1598033129183-c4f50c736f7d?q=80&w=400", rating: 4.5, sold: 300 },
   ];
 
   const addToCart = (product) => {
@@ -35,7 +38,46 @@ export default function Home() {
     alert(`${product.name} Cart এ Add হইছে!`);
   }
 
+  const removeFromCart = (index) => {
+    const newCart = cart.filter((_, i) => i!== index);
+    setCart(newCart);
+  }
+
   const total = cart.reduce((sum, item) => sum + item.price, 0);
+
+  const loginWithGoogle = () => {
+    setUser({ name: "Demo User", email: "demo@gmail.com" });
+    setShowLogin(false);
+    alert("Google দিয়ে Login Success!");
+  }
+
+  const loginWithPhone = () => {
+    const phone = prompt("আপনার নাম্বার দিন:");
+    if(phone) {
+      setUser({ name: "User", phone: phone });
+      setShowLogin(false);
+      alert("OTP Sent! Login Success!");
+    }
+  }
+
+  const placeOrder = (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const newOrder = {
+      id: Date.now(),
+      items: cart,
+      total: total,
+      name: formData.get('name'),
+      phone: formData.get('phone'),
+      address: formData.get('address'),
+      status: "Pending"
+    };
+    setOrders([...orders, newOrder]);
+    setCart([]);
+    setShowCheckout(false);
+    setShowCart(false);
+    alert(`Order #${newOrder.id} Placed! আমরা কল দিবো।`);
+  }
 
   useEffect(() => {
     const timer = setInterval(() => setCurrent((prev) => (prev + 1) % banners.length), 4000);
@@ -43,70 +85,105 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="bg-gray-50">
-      <div className="bg-white text-gray-600 text-xs border-b">
-        <div className="max-w-7xl mx-auto px-4 py-2 flex justify-end gap-6">
-          <a href="#" className="hover:text-orange-500">SAVE MORE ON APP</a>
-          <a href="#" className="hover:text-orange-500">BECOME A SELLER</a>
-          <a href="#" className="hover:text-orange-500">LOGIN</a>
-        </div>
-      </div>
+    <div className="bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 text-white min-h-screen">
 
-      <nav className="bg-white/80 backdrop-blur-md sticky top-0 z-50 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center gap-4">
-          <h1 className="text-3xl font-black bg-gradient-to-r from-orange-500 to-pink-500 bg-clip-text text-transparent">BAHARAZ</h1>
-          <input type="text" placeholder="Search in BAHARAZ" className="flex-1 rounded-full border-2 border-orange-200 px-6 py-2 focus:outline-none focus:border-orange-500" />
-          <button onClick={() => setShowCart(true)} className="text-2xl relative">🛒<span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5">{cart.length}</span></button>
+      {/* Navbar */}
+      <nav className="bg-white/10 backdrop-blur-xl border-b border-white/20 sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center gap-4">
+          <h1 className="text-4xl font-black bg-gradient-to-r from-cyan-400 via-fuchsia-400 to-pink-400 bg-clip-text text-transparent">BAHARAZ</h1>
+          <input type="text" placeholder="Search 2026 Collection..." className="flex-1 rounded-full bg-white/10 border border-white/20 px-6 py-2 text-white" />
+
+          {user? (
+            <button onClick={() => alert(`Welcome ${user.name}`)} className="bg-green-500 px-4 py-2 rounded-full">👤 {user.name}</button>
+          ) : (
+            <button onClick={() => setShowLogin(true)} className="bg-gradient-to-r from-cyan-500 to-blue-500 px-4 py-2 rounded-full font-bold">Login</button>
+          )}
+
+          <button onClick={() => setShowCart(true)} className="text-3xl relative">🛒<span className="absolute -top-2 -right-2 bg-pink-500 text-white text-xs rounded-full w-6 h-6">{cart.length}</span></button>
         </div>
       </nav>
 
-      {/* CART POPUP */}
-      {showCart && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center" onClick={() => setShowCart(false)}>
-          <div className="bg-white rounded-2xl p-6 w-96" onClick={(e) => e.stopPropagation()}>
-            <h2 className="text-xl font-bold mb-4">Your Cart - {cart.length} Items</h2>
-            {cart.length === 0? <p>Cart খালি</p> : cart.map((item, i) => <div key={i} className="flex justify-between py-2 border-b"><p>{item.name}</p><p>৳{item.price}</p></div>)}
-            <p className="font-bold text-lg mt-4">Total: ৳{total}</p>
-            <button className="bg-green-500 text-white w-full py-3 rounded-lg mt-4 font-bold">Checkout on WhatsApp</button>
-            <button onClick={() => setShowCart(false)} className="w-full py-2 mt-2">Close</button>
+      {/* LOGIN POPUP */}
+      {showLogin && (
+        <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center" onClick={() => setShowLogin(false)}>
+          <div className="bg-gray-800 rounded-3xl p-8 w-96" onClick={(e) => e.stopPropagation()}>
+            <h2 className="text-2xl font-black mb-6 text-center">Login to BAHARAZ</h2>
+            <button onClick={loginWithGoogle} className="bg-white text-black w-full py-3 rounded-xl font-bold mb-3">🔵 Continue with Google</button>
+            <button onClick={loginWithPhone} className="bg-green-500 text-white w-full py-3 rounded-xl font-bold">📱 Continue with Phone</button>
           </div>
         </div>
       )}
 
-      <div className={`bg-gradient-to-r ${banners[current].bg} transition-all duration-700`}>
-        <div className="max-w-7xl mx-auto px-4 py-8 flex-col md:flex-row items-center gap-8">
-          <div className="text-white flex-1">
-            <h2 className="text-5xl font-black">{banners[current].title}</h2>
-            <p className="text-xl mt-2">{banners[current].subtitle}</p>
-            <div className="bg-yellow-400 text-black font-bold rounded-full w-24 h-24 flex items-center justify-center mt-4">{banners[current].discount}</div>
-            <button className="bg-white text-orange-500 font-bold px-8 py-3 rounded-full mt-6 hover:scale-105">Shop Now</button>
+      {/* HERO */}
+      <div className={`bg-gradient-to-r ${banners[current].bg}`}>
+        <div className="max-w-7xl mx-auto px-4 py-12 flex-col md:flex-row items-center gap-8">
+          <div className="flex-1">
+            <h2 className="text-6xl font-black">{banners[current].title}</h2>
+            <p className="text-2xl mt-2">{banners[current].subtitle}</p>
+            <button className="bg-white text-purple-600 font-black px-10 py-4 rounded-full mt-6 hover:scale-110">Shop Now ⚡</button>
           </div>
-          <img src={banners[current].img} className="w-96 rounded-2xl shadow-2xl" alt="banner" />
+          <img src={banners[current].img} className="w-96 rounded-3xl" alt="banner" />
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        <h2 className="text-2xl font-bold mb-6">Shop By Category</h2>
+      {/* Categories */}
+      <div className="max-w-7xl mx-auto px-4 py-12">
+        <h2 className="text-3xl font-black mb-8 text-center">Shop By Category</h2>
         <div className="grid grid-cols-4 md:grid-cols-8 gap-4">
-          {categories.map(c => (<div key={c.name} className={`${c.color} rounded-2xl p-4 text-center cursor-pointer hover:scale-110 transition`}><div className="text-4xl">{c.icon}</div><p className="text-sm font-semibold mt-2">{c.name}</p></div>))}
-        </div>
-      </div>
-
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        <h2 className="text-2xl font-bold mb-6">🔥 Trending Now</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {products.map(p => (
-            <div key={p.id} className="bg-white rounded-2xl shadow-md p-3 hover:shadow-xl hover:-translate-y-1 transition">
-              <img src={p.img} className="rounded-lg h-40 w-full object-cover" alt={p.name} />
-              <h3 className="font-semibold mt-2 text-sm">{p.name}</h3>
-              <p className="text-orange-500 font-black text-lg">৳{p.price}</p>
-              <p className="text-gray-400 line-through text-xs">৳{p.oldPrice}</p>
-              <div className="text-xs text-gray-500">⭐ {p.rating} | Sold {p.sold}</div>
-              <button onClick={() => addToCart(p)} className="bg-gradient-to-r from-orange-500 to-pink-500 text-white w-full py-2 mt-2 rounded-lg font-bold hover:scale-105">Add to Cart</button>
+          {categories.map(c => (
+            <div key={c.name} onClick={() => alert(`${c.name} Category Coming Soon!`)} className={`bg-gradient-to-br ${c.color} rounded-3xl p-6 text-center cursor-pointer hover:scale-110 transition`}>
+              <div className="text-5xl">{c.icon}</div>
+              <p className="text-sm font-bold mt-2">{c.name}</p>
             </div>
           ))}
         </div>
       </div>
+
+      {/* Products */}
+      <div className="max-w-7xl mx-auto px-4 py-12">
+        <h2 className="text-3xl font-black mb-8 text-center">🔥 Trending in 2026</h2>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+          {products.map(p => (
+            <div key={p.id} className="bg-white/10 backdrop-blur-md rounded-3xl p-4 hover:-translate-y-2 transition">
+              <img src={p.img} className="rounded-2xl h-44 w-full object-cover" alt={p.name} />
+              <h3 className="font-bold mt-3">{p.name}</h3>
+              <p className="text-cyan-400 font-black text-xl">৳{p.price}</p>
+              <button onClick={() => addToCart(p)} className="bg-gradient-to-r from-fuchsia-500 to-pink-500 text-white w-full py-3 mt-3 rounded-xl font-black">Add to Cart</button>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* CART */}
+      {showCart && (
+        <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center" onClick={() => setShowCart(false)}>
+          <div className="bg-gray-800 rounded-3xl p-6 w-96" onClick={(e) => e.stopPropagation()}>
+            <h2 className="text-2xl font-black mb-4">Your Cart</h2>
+            {cart.length === 0? <p>Cart খালি</p> : cart.map((item, i) =>
+              <div key={i} className="flex justify-between py-2 border-b">
+                <p>{item.name}</p>
+                <button onClick={() => removeFromCart(i)} className="text-red-500">X</button>
+              </div>
+            )}
+            <p className="font-black text-2xl mt-4">Total: ৳{total}</p>
+            <button onClick={() => setShowCheckout(true)} disabled={cart.length===0} className="bg-green-500 text-white w-full py-3 rounded-xl mt-4 font-black disabled:bg-gray-500">Place Order</button>
+          </div>
+        </div>
+      )}
+
+      {/* CHECKOUT */}
+      {showCheckout && (
+        <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center">
+          <form onSubmit={placeOrder} className="bg-gray-800 rounded-3xl p-6 w-96">
+            <h2 className="text-2xl font-black mb-4">Checkout - Cash on Delivery</h2>
+            <input name="name" placeholder="Your Name" required className="w-full bg-white/10 p-3 rounded-lg mb-3" />
+            <input name="phone" placeholder="Phone Number" required className="w-full bg-white/10 p-3 rounded-lg mb-3" />
+            <input name="address" placeholder="Full Address" required className="w-full bg-white/10 p-3 rounded-lg mb-3" />
+            <p className="font-black text-xl mb-4">Total: ৳{total}</p>
+            <button type="submit" className="bg-gradient-to-r from-green-500 to-emerald-500 text-white w-full py-3 rounded-xl font-black">Confirm Order</button>
+          </form>
+        </div>
+      )}
     </div>
   );
 }
