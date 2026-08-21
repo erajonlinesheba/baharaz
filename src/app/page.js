@@ -11,18 +11,33 @@ export default function Home() {
   const [user, setUser] = useState(null);
   const [toast, setToast] = useState("");
   const [showPopup, setShowPopup] = useState(false);
-  const [time, setTime] = useState(86400); // 24 hours
-  const [liveOrder, setLiveOrder] = useState("");
+  const [time, setTime] = useState(86400);
 
   const showToast = (msg) => {
     setToast(msg);
     setTimeout(() => setToast(""), 2000);
   }
 
+  // বড় বড় Banner Image
   const banners = [
-    { title: "MEGA SALE 2026", subtitle: "Up To 80% OFF + Free Delivery Over ৳999", bg: "from-pink-600 via-purple-600 to-blue-600", img: "https://images.unsplash.com/photo-1555529669-ebe57ecb89fe?q=80&w=1200" },
-    { title: "FLASH SALE", subtitle: "Everything Must Go! 70% OFF", bg: "from-orange-600 via-red-600 to-pink-600", img: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?q=80&w=1200" },
-    { title: "NEW ARRIVALS", subtitle: "Latest Trends Just Dropped", bg: "from-cyan-600 via-green-600 to-emerald-600", img: "https://images.unsplash.com/photo-1445205170230-053b83016050?q=80&w=1200" }
+    {
+      title: "MEGA SALE 2026",
+      subtitle: "Up To 80% OFF + Free Delivery Over ৳999",
+      bg: "from-pink-600 via-purple-600 to-blue-600",
+      img: "https://images.unsplash.com/photo-1555529669-ebe57ecb89fe?q=80&w=1600"
+    },
+    {
+      title: "FLASH SALE",
+      subtitle: "Everything Must Go! 70% OFF | 12 Month EMI",
+      bg: "from-orange-600 via-red-600 to-pink-600",
+      img: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?q=80&w=1600"
+    },
+    {
+      title: "NEW ARRIVALS",
+      subtitle: "Latest Fashion & Tech Just Dropped",
+      bg: "from-cyan-600 via-green-600 to-emerald-600",
+      img: "https://images.unsplash.com/photo-1445205170230-053b83016050?q=80&w=1600"
+    }
   ];
 
   const categories = [
@@ -80,7 +95,7 @@ export default function Home() {
     return () => clearInterval(timer);
   }, []);
 
-  // Banner Auto Slide
+  // Banner Auto Slide 4s পর পর
   useEffect(() => {
     const timer = setInterval(() => setCurrent((prev) => (prev + 1) % banners.length), 4000);
     return () => clearInterval(timer);
@@ -91,33 +106,19 @@ export default function Home() {
     setTimeout(() => setShowPopup(true), 3000);
   }, []);
 
-  // Live Order Fake Notification
-  useEffect(() => {
-    const names = ["Rahim from Dhaka", "Sadia from Chittagong", "Karim from Rajshahi"];
-    const items = ["iPhone", "Hoodie", "Watch"];
-    const interval = setInterval(() => {
-      setLiveOrder(`${names[Math.floor(Math.random()*3)]} just bought ${items[Math.floor(Math.random()*3)]}`);
-      setTimeout(() => setLiveOrder(""), 4000);
-    }, 10000);
-    return () => clearInterval(interval);
-  }, []);
-
   const hours = Math.floor(time / 3600);
   const minutes = Math.floor((time % 3600) / 60);
   const seconds = time % 60;
 
   return (
-    <div className="bg-gradient-to-br from-[#0a0a1a] via-[#1a0a2a] to-[#0a1a2a] text-white min-h-screen animate-pulse">
-
-      {/* LIVE ORDER NOTIFICATION */}
-      {liveOrder && <div className="fixed bottom-5 left-5 bg-green-500 px-4 py-3 rounded-xl z-50 shadow-2xl animate-bounce">📦 {liveOrder}</div>}
+    <div className="bg-gradient-to-br from-[#0a0a1a] via-[#1a0a2a] to-[#0a1a2a] text-white min-h-screen">
 
       {/* WELCOME POPUP */}
       {showPopup && <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center">
-        <div className="bg-gradient-to-r from-pink-500 to-purple-500 rounded-3xl p-8 text-center">
-          <h2 className="text-4xl font-black">GET 10% OFF!</h2>
-          <p className="text-xl mt-2">Use Code: WELCOME10</p>
-          <button onClick={() => setShowPopup(false)} className="bg-white text-black px-8 py-3 rounded-full mt-4 font-black">Claim Now</button>
+        <div className="bg-gradient-to-r from-pink-500 to-purple-500 rounded-3xl p-8 text-center shadow-2xl">
+          <h2 className="text-5xl font-black">GET 10% OFF!</h2>
+          <p className="text-2xl mt-2">Use Code: WELCOME10</p>
+          <button onClick={() => setShowPopup(false)} className="bg-white text-black px-10 py-4 rounded-full mt-4 font-black text-xl hover:scale-110">Claim Now</button>
         </div>
       </div>}
 
@@ -127,7 +128,7 @@ export default function Home() {
       {/* Navbar */}
       <nav className="bg-white/10 backdrop-blur-2xl border-b border-white/20 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 py-4 flex items-center gap-4">
-          <h1 className="text-5xl font-black bg-gradient-to-r from-cyan-400 via-fuchsia-400 to-pink-400 bg-clip-text text-transparent animate-pulse">BAHARAZ</h1>
+          <h1 className="text-5xl font-black bg-gradient-to-r from-cyan-400 via-fuchsia-400 to-pink-400 bg-clip-text text-transparent">BAHARAZ</h1>
           <input type="text" placeholder="🔍 Search 10,000+ Products..." className="flex-1 rounded-full bg-white/10 border-2 border-cyan-400 px-6 py-3 text-white" />
           {user? <button className="bg-green-500/30 px-4 py-2 rounded-full">👤 {user.name}</button> : <button onClick={() => setShowLogin(true)} className="bg-gradient-to-r from-cyan-500 to-blue-500 px-5 py-2 rounded-full font-bold">Login</button>}
           <button onClick={() => showToast(`Wishlist: ${wishlist.length}`)} className="text-3xl relative">❤️<span className="absolute -top-2 -right-2 bg-pink-500 text-white text-xs rounded-full w-6 h-6">{wishlist.length}</span></button>
@@ -140,15 +141,19 @@ export default function Home() {
         <p className="font-bold text-xl">⚡ FLASH SALE ENDS IN: {hours}h {minutes}m {seconds}s ⚡</p>
       </div>
 
-      {/* ULTRA BANNER */}
-      <div className={`bg-gradient-to-r ${banners[current].bg} transition-all duration-1000`}>
-        <div className="max-w-7xl mx-auto px-4 py-16 flex-col md:flex-row items-center gap-8">
+      {/* FULL WIDTH BIG BANNER WITH IMAGE */}
+      <div className={`relative w-full h-[500px] bg-gradient-to-r ${banners[current].bg} transition-all duration-1000 overflow-hidden`}>
+        <img src={banners[current].img} className="absolute inset-0 w-full h-full object-cover opacity-40" alt="banner" />
+        <div className="relative max-w-7xl mx-auto px-4 h-full flex items-center">
           <div className="flex-1">
-            <h2 className="text-7xl font-black drop-shadow-2xl animate-bounce">{banners[current].title}</h2>
-            <p className="text-3xl mt-3 text-white/90">{banners[current].subtitle}</p>
-            <button className="bg-white text-purple-600 font-black px-12 py-4 rounded-full mt-6 hover:scale-110 transition shadow-2xl text-2xl">Shop Now ⚡</button>
+            <h2 className="text-8xl font-black drop-shadow-2xl">{banners[current].title}</h2>
+            <p className="text-3xl mt-4 text-white/90">{banners[current].subtitle}</p>
+            <button className="bg-white text-purple-600 font-black px-12 py-5 rounded-full mt-6 hover:scale-110 transition shadow-2xl text-2xl">Shop Now ⚡</button>
           </div>
-          <img src={banners[current].img} className="w-[500px] rounded-3xl shadow-2xl border-4 border-white/30 hover:scale-105 transition" alt="banner" />
+        </div>
+        {/* Banner Dots */}
+        <div className="absolute bottom-5 left-1/2 -translate-x-1/2 flex gap-3">
+          {banners.map((_, i) => <button key={i} onClick={() => setCurrent(i)} className={`w-4 h-4 rounded-full ${i===current? 'bg-white' : 'bg-white/50'}`}></button>)}
         </div>
       </div>
 
@@ -186,7 +191,7 @@ export default function Home() {
         </div>
       </div>
 
-      {/* CART & LOGIN & CHECKOUT SAME AS BEFORE */}
+      {/* CART & LOGIN & CHECKOUT */}
       {showCart && <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center" onClick={() => setShowCart(false)}><div className="bg-gray-900 rounded-3xl p-6 w-96" onClick={(e) => e.stopPropagation()}><h2 className="text-2xl font-black mb-4">Your Cart</h2>{cart.length === 0? <p>Cart খালি</p> : cart.map((item, i) => <div key={i} className="flex justify-between py-2"><p>{item.name}</p><p>৳{item.price}</p></div>)}<p className="font-black text-2xl mt-4">Total: ৳{total}</p><button onClick={() => setShowCheckout(true)} className="bg-green-500 text-white w-full py-3 rounded-xl mt-4 font-black">Place Order</button></div></div>}
       {showLogin && <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center" onClick={() => setShowLogin(false)}><div className="bg-gray-900 rounded-3xl p-8 w-96"><h2 className="text-2xl font-black mb-6">Login to BAHARAZ</h2><button onClick={loginWithGoogle} className="bg-white text-black w-full py-3 rounded-xl font-bold mb-3">🔵 Continue with Google</button><button onClick={loginWithPhone} className="bg-green-500 text-white w-full py-3 rounded-xl font-bold">📱 Continue with Phone</button></div></div>}
       {showCheckout && <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center"><form onSubmit={placeOrder} className="bg-gray-900 rounded-3xl p-6 w-96"><h2 className="text-2xl font-black mb-4">Checkout - Cash on Delivery</h2><input name="name" placeholder="Your Name" required className="w-full bg-white/10 p-3 rounded-lg mb-3" /><input name="phone" placeholder="Phone Number" required className="w-full bg-white/10 p-3 rounded-lg mb-3" /><input name="address" placeholder="Full Address" required className="w-full bg-white/10 p-3 rounded-lg mb-3" /><button type="submit" className="bg-green-500 text-white w-full py-3 rounded-xl font-black">Confirm Order</button></form></div>}
