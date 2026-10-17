@@ -1,0 +1,15 @@
+{
+  "name": "Baharaz - Online Shopping BD",
+  "short_name": "Baharaz",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#f57224",
+  "icons": [
+    {
+      "src": "/icon",
+      "sizes": "any",
+      "type": "image/png"
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+export async function POST(req) {
+  const {amount, name, email, phone} = await req.json()
+  const data = new FormData()
+  data.append('store_id', process.env.SSL_STORE_ID)
+  data.append('store_passwd', process.env.SSL_STORE_PASS)
+  data.append('total_amount', amount)
+  data.append('currency', 'BDT')
+  data.append('tran_id', 'BAHARAZ' + Date.now())
+  data.append('success_url', 'http://localhost:3000/payment/success')
+  data.append('cus_name', name)
+  data.append('cus_phone', phone)
+  const res = await fetch('https://sandbox.sslcommerz.com/gwprocess/v4/api.php', { method: 'POST', body: data })
+  const result = await res.json()
+  return Response.json({ payment_url: result.GatewayPageURL })
+}

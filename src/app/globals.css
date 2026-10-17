@@ -1,26 +1,116 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* ============= BAHARAZ FLUID GRID SYSTEM - FIXED ============= */
+:root{
+  --max-width: 1440px;
+  --fluid-padding: clamp(12px, 2vw, 32px);
+  --grid-gap: clamp(12px, 1.5vw, 24px);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* === THIN BEAUTIFUL SCROLLBAR - FIXED === */
+html {
+  overflow-y: scroll;
+  scrollbar-gutter: stable;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 100px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+::-webkit-scrollbar-thumb:active {
+  background: #64748b;
+}
+
+body{
+  background: #F8FAFC;
+  overflow-x: hidden;
+}
+
+/* FLUID CONTAINER - 980px -> 1440px Fluid Grid */
+.page-container{
+  width: 100%;
+  max-width: var(--max-width);
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: var(--fluid-padding);
+  padding-right: var(--fluid-padding);
+}
+
+/* CSS GRID - 12 Column Fluid - CUSTOM PREFIX দিলাম যাতে Tailwind এর সাথে Conflict না হয় */
+.baharaz-grid{
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: var(--grid-gap);
+  width: 100%;
+}
+
+/* GRID SPAN HELPERS - নাম Change করলাম b-col- দিয়ে - Tailwind এর col-span নষ্ট হবে না */
+.b-col-span-12{grid-column: span 12}
+.b-col-span-8{grid-column: span 8}
+.b-col-span-6{grid-column: span 6}
+.b-col-span-4{grid-column: span 4}
+.b-col-span-3{grid-column: span 3}
+
+@media(max-width: 768px){
+ .b-md\:col-span-8{grid-column: span 12}
+ .b-md\:col-span-4{grid-column: span 12}
+ .b-md\:col-span-3{grid-column: span 6}
+ .b-md\:col-span-6{grid-column: span 12}
+}
+
+/* ============= STICKY NAVBAR - REAL ============= */
+.sticky-nav{
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  background: rgba(255,255,255,0.9);
+  border-bottom: 1px solid #E2E8F0;
+  transition: all 0.3s ease;
+}
+
+.sticky-nav.scrolled{
+  background: rgba(255,255,255,0.95);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+}
+
+/* Hide Scrollbar - ONLY WHERE NEEDED */
+.scrollbar-hide{
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar{
+  display: none;
+}
+
+/* ============= TOPBAR DROPDOWN FIX - ADDED ============= */
+.topbar-dropdown{
+  animation: dropdownFade 0.2s ease-out;
+}
+
+@keyframes dropdownFade {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
 }

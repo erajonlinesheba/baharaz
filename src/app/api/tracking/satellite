@@ -1,0 +1,6 @@
+import { NextResponse } from 'next/server';
+export async function POST(req) {
+  const { lat, lng } = await req.json();
+  const mapUrl = `https://maps.googleapis.com/maps/api/staticmap?center=${lat},${lng}&zoom=16&size=600x400&maptype=satellite&key=${process.env.GOOGLE_MAPS_API_KEY}`;
+  return NextResponse.json({ mapImage: mapUrl });
+}

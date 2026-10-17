@@ -1,0 +1,6 @@
+﻿import Link from "next/link"; import { ArrowLeft, FileText } from "lucide-react"
+export default function Terms(){ return(<div className='min-h-screen bg-[#f8f8fb]'><div className='max-w-[900px] mx-auto px-4 py-6'><Link href='/' className='inline-flex items-center gap-2 bg-white/90 backdrop-blur-xl border px-6 py-3 rounded-full text-[13px] font-black shadow-lg hover:bg-[#f85606] hover:text-white transition-all'><ArrowLeft size={16}/> Back to Home</Link></div><div className='bg-white rounded-[28px] border p-5 md:p-8 md:p-10 mt-6'><div className='flex gap-4'><div className='w-14 h-14 rounded-[16px] bg-gray-900 flex items-center justify-center text-white'><FileText/></div><div><h1 className='text-[26px] font-black'>Terms and Conditions</h1><p className='text-[13px] text-gray-500 mt-1'>Clear and fair terms for everyone</p></div></div><div className='mt-8 space-y-3 text-[13px] leading-[24px]'><p>1. You must be 18+ to shop on Baharaz.</p><p>2. Secure PIN must be kept private. You are responsible for your PIN.</p><p>3. Returns accepted within 7 days as per return policy.</p><p>4. Official warranty as mentioned on product page.</p><p>5. Sellers must ship authentic products only.</p><p className='mt-6 text-[11px] text-gray-400'>Last updated January 2026 - Baharaz Bangladesh</p></div></div></div>) }
+
+
+
+
