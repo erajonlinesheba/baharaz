@@ -3,7 +3,7 @@
   "version": "2.0.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start"
   },
@@ -14,10 +14,8 @@
     "@google/generative-ai": "^0.24.1",
     "@supabase/ssr": "^0.6.1",
     "@supabase/supabase-js": "^2.117.3",
-    "@tensorflow/tfjs": "^4.22.0",
     "@upstash/redis": "^1.39.0",
     "algoliasearch": "^4.24.0",
-    "face-api.js": "^0.22.2",
     "framer-motion": "^12.12.1",
     "groq-sdk": "^1.6.0",
     "lucide-react": "^0.511.0",

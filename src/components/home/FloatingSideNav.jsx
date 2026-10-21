@@ -1,25 +1,40 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 
 export default function FloatingSideNav() {
   const [show, setShow] = useState(false);
-  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
-    const onScroll = () => setShow(window.scrollY > 600);
+    let ticking = false
+    const onScroll = () => {
+      if(!ticking){
+        window.requestAnimationFrame(()=>{
+          setShow(window.scrollY > 600)
+          ticking = false
+        })
+        ticking = true
+      }
+    }
     window.addEventListener("scroll", onScroll, { passive: true });
     onScroll();
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  if (!mounted ||!show) return null;
+  const scrollTo = useCallback((id)=>{
+    if(id === "top"){
+      window.scrollTo({ top: 0, behavior: "smooth" })
+    }else{
+      document.getElementById(id)?.scrollIntoView({ behavior: "smooth" })
+    }
+  },[])
+
+  if (!show) return null;
 
   const items = [
-    { id: "top", label: "Back to Top", bg: "bg-[#2e3346]" },
-    { id: "flash-sale", label: "Flash Sale", bg: "bg-[#fff1eb]", iconColor: "text-[#f85606]", hover: "hover:bg-[#ff3d00] hover:text-white" },
-    { id: "categories", label: "Categories", bg: "bg-[#f3f0ff]", iconColor: "text-[#7c4dff]", hover: "hover:bg-[#7c4dff] hover:text-white" },
-    { id: "just-for-you", label: "Just For You", bg: "bg-[#e8f5e9]", iconColor: "text-[#00c853]", hover: "hover:bg-[#00c853] hover:text-white" },
+    { id: "top", label: "Back to Top" },
+    { id: "flash-sale", label: "Flash Sale" },
+    { id: "categories", label: "Categories" },
+    { id: "just-for-you", label: "Just For You" },
   ];
 
   return (
@@ -33,21 +48,25 @@ export default function FloatingSideNav() {
 
           {item.id === "top"? (
             <button
-              onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+              onClick={() => scrollTo("top")}
               className="w-[38px] h-[38px] flex items-center justify-center bg-[#2e3346] rounded-t-[10px] text-white hover:bg-black transition-colors"
               aria-label="Back to top"
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5"><path d="m18 15-6-6-6 6"/></svg>
             </button>
           ) : (
-            <a
-              href={`#${item.id}`}
-              className={`w-[38px] h-[38px] flex items-center justify-center ${item.bg} ${item.iconColor} ${item.hover} border-t border-[#f0f0f0] transition-all duration-200 last:rounded-b-[10px]`}
+            <button
+              onClick={() => scrollTo(item.id)}
+              className={`w-[38px] h-[38px] flex items-center justify-center border-t border-[#f0f0f0] transition-all duration-200 last:rounded-b-[10px]
+                ${item.id==="flash-sale" ? "bg-[#fff1eb] text-[#f85606] hover:bg-[#ff3d00] hover:text-white" : ""}
+                ${item.id==="categories" ? "bg-[#f3f0ff] text-[#7c4dff] hover:bg-[#7c4dff] hover:text-white" : ""}
+                ${item.id==="just-for-you" ? "bg-[#e8f5e9] text-[#00c853] hover:bg-[#00c853] hover:text-white" : ""}
+              `}
             >
               {item.id === "flash-sale" && <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>}
               {item.id === "categories" && <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>}
               {item.id === "just-for-you" && <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 0 0-16 0"/></svg>}
-            </a>
+            </button>
           )}
         </div>
       ))}

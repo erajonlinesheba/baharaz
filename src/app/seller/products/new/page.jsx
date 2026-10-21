@@ -7,7 +7,7 @@ export default function NewProductPage() {
   const router = useRouter()
   const fileInputRef = useRef(null)
   const [user, setUser] = useState(null)
-  const [sellerId, setSellerId] = useState(null) // ✅ Real sellers.id
+  const [sellerId, setSellerId] = useState(null)
   const [storeName, setStoreName] = useState("")
   const [loading, setLoading] = useState(true)
   const [aiLoading, setAiLoading] = useState(false)
@@ -64,6 +64,19 @@ export default function NewProductPage() {
   const allSizes = ["XS", "S", "M", "L", "XL", "XXL", "3XL", "4XL", "Free Size", "28", "30", "32", "34", "36", "38", "40", "42", "44", "46", "One Size", "0-6M", "6-12M", "1-2Y", "2-3Y", "3-4Y", "5-6Y"]
   const brands = ["No Brand", "Baharaz", "Apple", "Samsung", "Xiaomi", "Nike", "Adidas", "Sony", "HP", "Dell", "Generic", "Local", "Anker", "Havit", "Remax", "Walton", "Vision", "Bata", "Apex", "Lotto", "Unilever", "Square", "ACI"]
 
+  // ✅ GOOGLE RULES SLUG GENERATOR
+  const createSlug = (text) => {
+    if (!text) return `product-${Date.now()}`
+    return text
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9\s-]/g, '')
+      .replace(/\s+/g, '-')
+      .replace(/-+/g, '-')
+      .replace(/^-|-$/g, '')
+      .substring(0, 60)
+  }
+
   useEffect(() => {
     let mounted = true
     const safetyTimeout = setTimeout(() => { if (mounted) setLoading(false) }, 1500)
@@ -90,7 +103,7 @@ export default function NewProductPage() {
           if(!foundName) foundName = session.user.email?.split("@")[0] || "My Store"
           if (mounted) {
             setStoreName(foundName)
-            setSellerId(foundSellerTableId) // ✅ Real ID or null
+            setSellerId(foundSellerTableId)
           }
         }
       } catch(e){}
@@ -241,11 +254,20 @@ export default function NewProductPage() {
       }
       if (uploadedUrls.length === 0) uploadedUrls = images.map((i) => i.preview)
 
-      // ✅ UNLIMITED SELLER - PROFESSIONAL FIX - Real sellers.id Use
+      // ✅ GOOGLE SEO SLUG - FIXED
+      let baseSlug = createSlug(form.name)
+      let finalSlug = baseSlug
+      // Check duplicate and make unique
+      const { data: existing } = await supabase.from("products").select("slug").eq("slug", baseSlug).maybeSingle()
+      if (existing) {
+        finalSlug = `${baseSlug}-${Date.now().toString().slice(-4)}`
+      }
+
       const realSellerId = sellerId || user.id
       const payload = {
         name: form.name.trim(),
         title: form.name.trim(),
+        slug: finalSlug, // ✅ FIXED - Google Rules
         brand: form.brand || "No Brand",
         category: form.category,
         sub_category: form.subCategory || "",
@@ -275,7 +297,6 @@ export default function NewProductPage() {
         danger_goods: form.dangerGoods,
         parcel_size: form.parcelSize,
         delivery_charge: parseInt(deliveryCharge) || 0,
-        // ✅ FIXED - Unlimited Seller All Store Will Work
         seller_id: realSellerId,
         seller_user_id: user.id,
         user_id: user.id,
@@ -283,9 +304,11 @@ export default function NewProductPage() {
 
       let { data, error } = await supabase.from("products").insert([payload]).select()
       if (error) {
+        // Fallback with minimal + slug
         const minimalPayload = {
           name: form.name.trim(),
           title: form.name.trim(),
+          slug: finalSlug,
           price: parseInt(form.price) || 0,
           stock: parseInt(form.stock || "10"),
           sku: form.sku,
@@ -305,7 +328,7 @@ export default function NewProductPage() {
         if (retry.error) throw retry.error
         data = retry.data
       }
-      alert(`✅ Published! ${form.name} is live on ${storeName}!`)
+      alert(`✅ Published! ${form.name}\n🔗 Link: /product/${finalSlug}\n🏪 Store: ${storeName}!`)
       router.push("/seller/products")
     } catch (err) {
       const msg = err?.message || JSON.stringify(err)
@@ -331,7 +354,7 @@ export default function NewProductPage() {
             <div className="rounded-[18px] bg-white p-4 flex flex-col md:flex-row items-center justify-between gap-3">
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-violet-600 to-indigo-600 flex items-center justify-center text-white font-black text-xl shadow">{storeName? storeName.charAt(0).toUpperCase() : 'B'}</div>
-                <div><h3 className="font-black text-[15px] leading-none">{storeName} AI PRO MAX</h3><p className="text-[11px] text-gray-500 mt-1">Auto Description • Auto SEO • {sellerId? `ID: ${sellerId.slice(0,8)}...` : 'Unlimited Seller'}</p></div>
+                <div><h3 className="font-black text-[15px] leading-none">{storeName} AI PRO MAX</h3><p className="text-[11px] text-gray-500 mt-1">Auto Slug • Auto SEO • {sellerId? `ID: ${sellerId.slice(0,8)}...` : 'Unlimited Seller'}</p></div>
               </div>
               <button type="button" onClick={handleAiGenerate} disabled={aiLoading} className="w-full md:w-auto px-6 py-3 rounded-full bg-gradient-to-r from-violet-600 to-indigo-600 text-white text-[12px] font-black shadow hover:scale-[1.02] transition disabled:opacity-50">{aiLoading? "✨ Writing..." : "✨ Generate with AI"}</button>
             </div>
@@ -339,7 +362,11 @@ export default function NewProductPage() {
 
           <div className="bg-white rounded-[16px] border shadow-sm p-5 space-y-5">
             <div className="flex items-center gap-2 border-b pb-3"><div className="w-1 h-5 bg-[#f57224] rounded-full"></div><h2 className="font-black text-[13px] uppercase tracking-widest">Basic Information - {storeName}</h2></div>
-            <div><label className="text-[11px] font-black uppercase text-gray-700">Product Name *</label><input value={form.name} onChange={(e) => setForm({...form, name: e.target.value })} placeholder="Ex: Ramy Black Rose Perfume 50ml" className="w-full mt-2 px-4 py-3.5 rounded-xl border-2 text-[14px] font-bold outline-none focus:border-[#f57224] bg-[#fafafa]" /></div>
+            <div>
+              <label className="text-[11px] font-black uppercase text-gray-700">Product Name *</label>
+              <input value={form.name} onChange={(e) => setForm({...form, name: e.target.value })} placeholder="Ex: Ramy Black Rose Perfume 50ml" className="w-full mt-2 px-4 py-3.5 rounded-xl border-2 text-[14px] font-bold outline-none focus:border-[#f57224] bg-[#fafafa]" />
+              {form.name && <p className="text-[10px] text-green-600 font-bold mt-1">🔗 Slug Preview: /product/{createSlug(form.name)}</p>}
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div><label className="text-[11px] font-black uppercase">Brand *</label><select value={form.brand} onChange={(e) => setForm({...form, brand: e.target.value })} className="w-full mt-2 px-4 py-3 rounded-xl border-2 text-[13px] font-bold bg-white outline-none focus:border-[#f57224]"><option value="">Select Brand</option>{brands.map((b) => <option key={b} value={b}>{b}</option>)}</select></div>
               <div><label className="text-[11px] font-black uppercase">SKU - Auto Generated</label><div className="flex gap-2 mt-2"><input value={form.sku} readOnly className="flex-1 px-4 py-3 rounded-xl border-2 text-[13px] font-mono bg-gray-50 font-bold" /><button type="button" onClick={generateSku} className="px-3 bg-black text-white rounded-xl text-[11px] font-bold">New</button></div></div>
@@ -444,24 +471,13 @@ export default function NewProductPage() {
                 {images.map((img, idx) => <img key={img.id} src={img.preview} onClick={() => setActiveImg(idx)} className={`w-12 h-12 rounded-lg border-2 object-cover cursor-pointer flex-shrink-0 ${activeImg === idx? "border-[#f57224]" : "border-gray-200 opacity-60"}`} alt="" />)}
               </div>
               <h2 className="font-bold text-[14px] mt-3 leading-snug line-clamp-2">{form.name || "Product Name"}</h2>
+              {form.name && <p className="text-[10px] text-green-600 font-bold mt-1 break-all">/product/{createSlug(form.name)}</p>}
               <div className="flex items-center gap-2 mt-1"><span className="text-[10px] text-[#1a9cb7] font-medium">Brand: {form.brand || "No Brand"}</span><span className="text-[10px] text-gray-300">|</span><span className="text-[10px] text-gray-500">SKU: {form.sku}</span></div>
               {form.category && <div className="text-[10px] text-gray-500 mt-1 bg-gray-50 inline-block px-2 py-1 rounded-full">{form.category}{form.subCategory? ` › ${form.subCategory}` : ''}</div>}
               <div className="mt-3 flex items-baseline gap-2">
                 <span className="text-[22px] font-black text-[#f57224]">৳{form.price || "0"}</span>
                 {form.originalPrice && <span className="text-[12px] text-gray-400 line-through">৳{form.originalPrice}</span>}
                 {discount > 0 && <span className="text-[11px] font-bold text-white bg-[#f57224] px-1.5 rounded">-{discount}%</span>}
-              </div>
-              <div className="mt-3 grid grid-cols-2 gap-2 text-[10px]">
-                <div className="bg-[#f5f5f5] rounded-lg p-2"><p className="text-gray-500">Delivery</p><p className="font-bold mt-0.5">{form.delivery}</p><p className="text-[9px] text-gray-400">{deliveryCharge}৳ Charge</p></div>
-                <div className="bg-[#f5f5f5] rounded-lg p-2"><p className="text-gray-500">Service</p><p className="font-bold mt-0.5">{form.returnPolicy}</p><p className="text-[9px] text-gray-400">{form.warranty}</p></div>
-              </div>
-              {form.colors.length > 0 && <div className="mt-3"><p className="text-[11px] font-bold">Colors: <span className="font-normal">{form.colors.join(", ")}</span></p></div>}
-              {form.sizes.length > 0 && <div className="mt-2"><p className="text-[11px] font-bold">Size: <span className="font-normal">{form.sizes.join(", ")}</span></p></div>}
-              <div className="mt-4 p-2.5 bg-[#f8f8f8] rounded-xl border">
-                <p className="text-[10px] font-black uppercase text-gray-700">Sold by</p>
-                <div className="flex items-center justify-between mt-1"><p className="text-[12px] font-bold truncate">{storeName || "Your Store"}</p><span className="text-[9px] bg-blue-500 text-white px-2 py-0.5 rounded shrink-0 ml-2">✓ Verified</span></div>
-                <p className="text-[10px] text-gray-500 mt-1 truncate">{form.category}{form.subCategory? ` > ${form.subCategory}` : ''} • Fast Delivery</p>
-                <p className="text-[8px] text-gray-400 mt-1 font-mono">Seller ID: {sellerId? sellerId.slice(0,12)+'...' : 'Auto'}</p>
               </div>
             </div>
           </div>

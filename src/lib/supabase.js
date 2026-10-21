@@ -1,8 +1,11 @@
-﻿import { createClient } from '@supabase/supabase-js';
-const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-export const supabase = createClient(url, key, {
-  auth: { persistSession: true },
-  db: { schema: 'public' },
-  global: { headers: { 'X-Baharaz-Real': 'world-no1-faster-than-amazon' } }
-});
+﻿'use client'
+import { createBrowserClient } from '@supabase/ssr'
+
+export function createClient() {
+  return createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  )
+}
+
+export const supabase = createClient()

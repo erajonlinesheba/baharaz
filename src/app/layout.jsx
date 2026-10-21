@@ -21,7 +21,7 @@ export const metadata = {
 export const viewport = {
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
+  maximumScale: 5,
   viewportFit: "cover",
   themeColor: "#F85606",
 };
@@ -29,23 +29,21 @@ export const viewport = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-      </head>
-      <body className="bg-[#f5f5f5] antialiased min-h-screen flex flex-col overflow-x-hidden" suppressHydrationWarning>
-        {/* ClientShell এর ভিতরে TopBar 1188x26 + Header 1188x75 + Categories আছে */}
+      <body className="bg-[#f5f5f5] antialiased overflow-x-hidden overflow-y-auto" suppressHydrationWarning>
         <ClientShell>
-          {/* Main Content - Flash Sale আর কাটবে না, z-0 দিয়ে Header থেকে আলাদা */}
-          <main className="flex-1 w-full flex justify-center relative z-0">
-            <div className="w-full">
+          {/* MOBILE - Scroll Fix */}
+          <div className="block md:hidden w-full bg-[#f5f5f5]">
+            <main className="w-full overflow-visible">
               {children}
-            </div>
-          </main>
+            </main>
+          </div>
+          {/* WEB */}
+          <div className="hidden md:block w-full bg-[#f5f5f5]">
+            <main className="w-full max-w-[1200px] mx-auto relative z-0 overflow-visible">
+              {children}
+            </main>
+          </div>
         </ClientShell>
-
-        {/* Bottom Padding for Mobile Navbar - যাতে Flash Sale এর শেষ Product কাটা না যায় */}
-        <div className="h-[60px] lg:hidden shrink-0" />
       </body>
     </html>
   );

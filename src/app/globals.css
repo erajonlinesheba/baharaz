@@ -7,17 +7,23 @@
   --max-width: 1440px;
   --fluid-padding: clamp(12px, 2vw, 32px);
   --grid-gap: clamp(12px, 1.5vw, 24px);
+  --header-height: 64px;
+  --banner-height: 190px;
 }
 
 /* === THIN BEAUTIFUL SCROLLBAR - FIXED === */
 html {
   overflow-y: scroll;
   scrollbar-gutter: stable;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
 * {
   scrollbar-width: thin;
   scrollbar-color: #cbd5e1 transparent;
+  -webkit-tap-highlight-color: transparent;
 }
 
 ::-webkit-scrollbar {
@@ -32,19 +38,25 @@ html {
 ::-webkit-scrollbar-thumb {
   background: #cbd5e1;
   border-radius: 100px;
+  border: 1px solid transparent;
+  background-clip: content-box;
 }
 
 ::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
+  background-clip: content-box;
 }
 
 ::-webkit-scrollbar-thumb:active {
   background: #64748b;
+  background-clip: content-box;
 }
 
 body{
   background: #F8FAFC;
   overflow-x: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', sans-serif;
+  font-feature-settings: 'rlig' 1, 'calt' 1;
 }
 
 /* FLUID CONTAINER - 980px -> 1440px Fluid Grid */
@@ -57,7 +69,7 @@ body{
   padding-right: var(--fluid-padding);
 }
 
-/* CSS GRID - 12 Column Fluid - CUSTOM PREFIX দিলাম যাতে Tailwind এর সাথে Conflict না হয় */
+/* CSS GRID - 12 Column Fluid - CUSTOM PREFIX */
 .baharaz-grid{
   display: grid;
   grid-template-columns: repeat(12, 1fr);
@@ -65,7 +77,7 @@ body{
   width: 100%;
 }
 
-/* GRID SPAN HELPERS - নাম Change করলাম b-col- দিয়ে - Tailwind এর col-span নষ্ট হবে না */
+/* GRID SPAN HELPERS */
 .b-col-span-12{grid-column: span 12}
 .b-col-span-8{grid-column: span 8}
 .b-col-span-6{grid-column: span 6}
@@ -105,7 +117,7 @@ body{
   display: none;
 }
 
-/* ============= TOPBAR DROPDOWN FIX - ADDED ============= */
+/* ============= TOPBAR DROPDOWN FIX ============= */
 .topbar-dropdown{
   animation: dropdownFade 0.2s ease-out;
 }
@@ -113,4 +125,143 @@ body{
 @keyframes dropdownFade {
   from { opacity: 0; transform: translateY(-10px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+/* ============= MOBILE HEADER FIX - NEW ============= */
+.mobile-header-banner{
+  position: relative;
+  width: 100%;
+  height: var(--banner-height);
+  overflow: hidden;
+  background: #f5f5f5;
+}
+
+.mobile-header-banner img{
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  will-change: transform;
+}
+
+.mobile-search-box{
+  height: 38px !important;
+  min-height: 38px !important;
+  max-height: 38px !important;
+}
+
+.mobile-search-box input{
+  font-size: 13px !important;
+  line-height: 1 !important;
+}
+
+/* Safe Payment Bar - Fixed Height */
+.safe-payment-bar{
+  height: 36px !important;
+  min-height: 36px !important;
+  display: flex;
+  align-items: center;
+}
+
+/* Icons Row - No Wrap Issue Fix */
+.mobile-icons-row{
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x proximity;
+  padding-bottom: 4px;
+}
+
+.mobile-icons-row::-webkit-scrollbar{
+  display: none;
+}
+
+/* ============= BANNER DOTS FIX ============= */
+.banner-dots{
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 4px;
+  z-index: 10;
+}
+
+.banner-dot{
+  height: 3px;
+  border-radius: 100px;
+  background: rgba(255,255,255,0.6);
+  transition: all 0.3s ease;
+}
+
+.banner-dot.active{
+  width: 14px;
+  background: white;
+}
+
+/* ============= IOS GLASS EFFECT ============= */
+.ios-glass{
+  background: rgba(255,255,255,0.94);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 0.5px solid rgba(255,255,255,0.9);
+}
+
+/* ============= PREVENT HORIZONTAL SCROLL ============= */
+@media (max-width: 768px){
+  body{
+    overflow-x: hidden;
+    position: relative;
+  }
+  
+  .page-container{
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+}
+
+/* ============= FOCUS VISIBLE FIX - লাল দাগ Fix ============= */
+*:focus-visible{
+  outline: none !important;
+}
+
+/* Search Input - লাল Outline পুরা বাদ */
+input:focus,
+input:focus-visible,
+textarea:focus,
+textarea:focus-visible,
+select:focus,
+select:focus-visible{
+  outline: none !important;
+  box-shadow: none !important;
+  border-color: #1A1A1A !important;
+}
+
+input[type="text"]:focus{
+  outline: none !important;
+  ring: 0 !important;
+  --tw-ring-offset-width: 0 !important;
+  --tw-ring-color: transparent !important;
+}
+
+/* ============= BUTTON ACTIVE STATES ============= */
+button:active,
+a:active{
+  transform: scale(0.97);
+  transition: transform 0.1s ease;
+}
+
+button:focus,
+button:focus-visible,
+a:focus,
+a:focus-visible{
+  outline: none !important;
+}
+
+/* ============= IMAGE RENDERING ============= */
+img{
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
 }

@@ -2,20 +2,22 @@ import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import Script from 'next/script'
 
-export const revalidate = 3600
-export const dynamicParams = true
+export const revalidate = 60
+export const dynamic = 'force-dynamic'
 
-// ================= SEO METADATA - GOOGLE 1 NUMBER =================
-export async function generateMetadata({ params }) {
+// ================= GOOGLE SEO #1 =================
+export async function generateMetadata({ params, searchParams }) {
   const { slug } = await params
   const decodedSlug = decodeURIComponent(slug || 'all')
   const cleanName = decodedSlug.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
-  const categoryName = decodedSlug === 'all'? 'All Categories' : cleanName
+  const categoryName = decodedSlug.toLowerCase() === 'all' ? 'All Categories' : cleanName
+  const sParams = await searchParams
+  const sortBy = sParams?.sort || 'newest'
 
-  const title = `${categoryName} - Buy ${categoryName} Online at Best Price in Bangladesh | Baharaz`
-  const description = `Buy ${categoryName} at lowest price in Bangladesh. Shop from huge collection of ${categoryName} like ${categoryName} - Mini Fan, Power Bank, Smart Watch, T-Shirt & more. ✓Fast Delivery ✓Best Deals ✓Cash on Delivery - Baharaz.com`
-  const keywords = `${categoryName}, buy ${categoryName} online, ${categoryName} price in Bangladesh, ${categoryName} BD, cheap ${categoryName}, Baharaz ${categoryName}, Daraz ${categoryName} alternative, ${categoryName} online shopping`
-  const url = `https://www.baharaz.com/category/${decodedSlug}`
+  const title = `${categoryName} Price in Bangladesh - Buy ${categoryName} Online | Baharaz`
+  const description = `Buy ${categoryName} at lowest price in Bangladesh. ${categoryName} - 100+ products. Shop Mini Fan, Power Bank, Mobiles, Fashion, Electronics & more. ✓ Fast Delivery ✓ Cash on Delivery ✓ Best Deals - Baharaz.com`
+  const keywords = `${categoryName}, buy ${categoryName} online, ${categoryName} price in Bangladesh, ${categoryName} BD, cheap ${categoryName}, Baharaz ${categoryName}, ${categoryName} online shopping BD, best ${categoryName}`
+  const url = `https://www.baharaz.com/category/${encodeURIComponent(decodedSlug)}`
 
   return {
     title,
@@ -24,68 +26,131 @@ export async function generateMetadata({ params }) {
     alternates: { canonical: url },
     robots: { index: true, follow: true, googleBot: { index: true, follow: true, 'max-video-preview': -1, 'max-image-preview': 'large', 'max-snippet': -1 } },
     openGraph: {
-      title, description, url, siteName: 'Baharaz - Best Online Shopping in Bangladesh', locale: 'en_BD', type: 'website',
-      images: [{ url: 'https://www.baharaz.com/og-category.jpg', width: 1200, height: 630, alt: `${categoryName} - Baharaz` }]
+      title,
+      description,
+      url,
+      siteName: 'Baharaz - Best Online Shopping in Bangladesh',
+      locale: 'en_BD',
+      type: 'website',
+      images: [{ url: 'https://www.baharaz.com/og-image.jpg', width: 1200, height: 630, alt: `${categoryName} - Baharaz` }],
     },
     twitter: {
-      card: 'summary_large_image', title, description, site: '@baharazbd', creator: '@baharazbd',
-      images: ['https://www.baharaz.com/og-category.jpg']
+      card: 'summary_large_image',
+      title,
+      description,
+      images: ['https://www.baharaz.com/og-image.jpg'],
     },
-    verification: { google: 'google-verification-code', facebook: 'facebook-domain-verification' },
-    other: { 'og:email': 'support@baharaz.com', 'og:phone_number': '+8801XXXXXXXXX', 'og:availability': 'instock' }
   }
 }
 
-// ================= PAGE =================
-export default async function CategorySlugPage({ params }) {
+export default async function Page({ params, searchParams }) {
   const { slug } = await params
   const decodedSlug = decodeURIComponent(slug || 'all')
+  const sParams = await searchParams
+  const sortBy = sParams?.sort || 'newest'
+  const priceMin = Number(sParams?.min || 0)
+  const priceMax = Number(sParams?.max || 0)
   const supabase = await createClient()
 
   let products = []
-  let categoryName = decodedSlug.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
-  let categoryInfo = null
-  let relatedCategories = []
-  let totalProducts = 0
+  let categoryName = decodedSlug.replace(/-/g, ' ')
+  let relatedCats = []
+  let totalCount = 0
+  let allCategories = []
 
   try {
-    if (decodedSlug.toLowerCase()!== 'all') {
-      const { data: cat } = await supabase.from('categories').select('*').or(`slug.eq.${decodedSlug},name.ilike.%${categoryName}%`).maybeSingle()
-      if (cat) {
-        categoryInfo = cat
-        categoryName = cat.name
-      }
-    }
+    // Get all categories for filter
+    const { data: catList } = await supabase.from('categories').select('id,name,slug').limit(20)
+    if (catList) allCategories = catList
 
     if (decodedSlug.toLowerCase() === 'all') {
-      const { data, count } = await supabase.from('products').select('*', { count: 'exact' }).order('created_at', { ascending: false }).limit(100)
+      let query = supabase.from('products').select('id, title, name, price, original_price, discount_percent, image_url, images, slug, category, rating, sold_count, created_at', { count: 'exact' })
+      
+      if (priceMin > 0) query = query.gte('price', priceMin)
+      if (priceMax > 0) query = query.lte('price', priceMax)
+
+      if (sortBy === 'price_low') query = query.order('price', { ascending: true })
+      else if (sortBy === 'price_high') query = query.order('price', { ascending: false })
+      else if (sortBy === 'popular') query = query.order('sold_count', { ascending: false })
+      else query = query.order('created_at', { ascending: false })
+
+      const { data, count } = await query.limit(60)
       products = data || []
-      totalProducts = count || products.length
-      categoryName = 'All Categories'
+      totalCount = count || products.length
+      categoryName = 'All Products'
     } else {
-      let { data, count } = await supabase.from('products').select('*', { count: 'exact' }).ilike('category', `%${categoryName}%`).order('created_at', { ascending: false }).limit(100)
+      // SAFE QUERY - No Injection
+      let data = null
+      let count = 0
+
+      // Try 1: exact category ilike
+      const res1 = await supabase.from('products').select('id, title, name, price, original_price, discount_percent, image_url, images, slug, category, rating, sold_count, created_at', { count: 'exact' }).ilike('category', `%${categoryName}%`).limit(60)
+      data = res1.data
+      count = res1.count
+
+      // Try 2: slug to name
       if (!data || data.length === 0) {
-        const fallbackName = decodedSlug.replace(/-/g, ' ')
-        const res = await supabase.from('products').select('*', { count: 'exact' }).ilike('category', `%${fallbackName}%`).order('created_at', { ascending: false }).limit(100)
-        data = res.data
-        count = res.count
+        const try2 = decodedSlug.replace(/-/g, ' ')
+        const res2 = await supabase.from('products').select('id, title, name, price, original_price, discount_percent, image_url, images, slug, category, rating, sold_count, created_at', { count: 'exact' }).ilike('category', `%${try2}%`).limit(60)
+        data = res2.data
+        count = res2.count
+        if (data?.length) categoryName = try2
       }
-      products = data || []
-      totalProducts = count || products.length
+
+      // Try 3: categories table safe search
+      const { data: catData } = await supabase.from('categories').select('id, name, slug').eq('slug', decodedSlug).maybeSingle()
+      let finalCatName = categoryName
+      if (catData) {
+        finalCatName = catData.name
+        categoryName = catData.name
+        if (!data || data.length === 0) {
+          const res3 = await supabase.from('products').select('id, title, name, price, original_price, discount_percent, image_url, images, slug, category, rating, sold_count, created_at', { count: 'exact' }).ilike('category', `%${catData.name}%`).limit(60)
+          if (res3.data?.length) { data = res3.data; count = res3.count }
+        }
+      }
+
+      // Apply price & sort filter
+      let filtered = data || []
+      if (priceMin > 0) filtered = filtered.filter(p => Number(p.price) >= priceMin)
+      if (priceMax > 0) filtered = filtered.filter(p => Number(p.price) <= priceMax)
+
+      if (sortBy === 'price_low') filtered = filtered.sort((a,b) => Number(a.price) - Number(b.price))
+      else if (sortBy === 'price_high') filtered = filtered.sort((a,b) => Number(b.price) - Number(a.price))
+      else if (sortBy === 'popular') filtered = filtered.sort((a,b) => Number(b.sold_count||0) - Number(a.sold_count||0))
+
+      products = filtered
+      totalCount = count || filtered.length
+
+      // Capitalize display name
+      categoryName = categoryName.replace(/\b\w/g, l => l.toUpperCase())
     }
 
-    const { data: relData } = await supabase.from('products').select('category').limit(100)
-    if (relData) {
-      const unique = [...new Set(relData.map(r => r.category).filter(Boolean))]
-      relatedCategories = unique.slice(0, 12).map(name => ({
-        name,
-        slug: name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''),
-        count: relData.filter(r => r.category === name).length
-      }))
+    // Related Categories
+    const { data: rel } = await supabase.from('products').select('category').limit(100)
+    if (rel) {
+      const uniq = [...new Set(rel.map(r=>r.category).filter(Boolean).filter(c=>c.toLowerCase()!== categoryName.toLowerCase()))].slice(0,12)
+      relatedCats = uniq.map(n=>({ name: n, slug: n.toLowerCase().replace(/\s+/g,'-').replace(/&/g,'and').replace(/[^a-z0-9-]/g,'') }))
     }
+  } catch (e) {
+    console.log("Category Error:", e?.message)
+    products = []
+  }
 
-  } catch (error) {
-    console.log('Category Page Error:', error.message)
+  const getDiscount = (p) => {
+    if(p.discount_percent) return p.discount_percent
+    if(p.original_price && p.price && p.original_price > p.price) return Math.round(((p.original_price - p.price)/p.original_price)*100)
+    return 0
+  }
+
+  const getImage = (p) => {
+    try {
+      if (Array.isArray(p.images) && p.images[0]) return typeof p.images[0] === 'string' ? p.images[0] : p.images[0]?.url
+      if (typeof p.images === 'string') {
+        const parsed = JSON.parse(p.images)
+        if (Array.isArray(parsed) && parsed[0]) return parsed[0]
+      }
+      return p.image_url || '/placeholder.png'
+    } catch { return p.image_url || '/placeholder.png' }
   }
 
   const breadcrumbSchema = {
@@ -102,7 +167,7 @@ export default async function CategorySlugPage({ params }) {
     '@context': 'https://schema.org',
     '@type': 'CollectionPage',
     name: `${categoryName} - Baharaz`,
-    description: `Shop ${categoryName} at best price in Bangladesh`,
+    description: `Shop ${categoryName} at best price in Bangladesh - ${totalCount} products`,
     url: `https://www.baharaz.com/category/${decodedSlug}`,
     isPartOf: { '@type': 'WebSite', name: 'Baharaz', url: 'https://www.baharaz.com' },
     mainEntity: {
@@ -112,173 +177,185 @@ export default async function CategorySlugPage({ params }) {
         '@type': 'ListItem',
         position: idx + 1,
         url: `https://www.baharaz.com/product/${p.slug || p.id}`,
-        name: p.title || p.name
+        name: p.title || p.name,
+        image: getImage(p)
       }))
     }
   }
 
-  // FIX IMAGE HELPER - 100% FIX FOR CUT IMAGE
-  const getProductImage = (p) => {
-    if (p.images && Array.isArray(p.images) && p.images.length > 0) {
-      const first = p.images[0]
-      if (typeof first === 'string') return first
-      if (first?.url) return first.url
-    }
-    if (p.images && typeof p.images === 'string') {
-      try {
-        const parsed = JSON.parse(p.images)
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed[0]
-      } catch {}
-    }
-    return p.image_url || p.image || p.thumbnail || 'https://via.placeholder.com/200?text=No+Image'
+  const faqSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: [
+      { '@type': 'Question', name: `What is the price of ${categoryName} in Bangladesh?`, acceptedAnswer: { '@type': 'Answer', text: `${categoryName} price in Bangladesh starts from ৳99 to ৳5000. You can buy best quality ${categoryName} from Baharaz with cash on delivery.` } },
+      { '@type': 'Question', name: `Where to buy ${categoryName} online?`, acceptedAnswer: { '@type': 'Answer', text: `You can buy ${categoryName} online from Baharaz.com - best online shopping in Bangladesh with fast delivery.` } }
+    ]
   }
 
   return (
     <>
       <Script id="breadcrumb-schema" type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
       <Script id="itemlist-schema" type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListSchema) }} />
+      <Script id="faq-schema" type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
 
-      <div className='bg-[#F5F5F5] min-h-screen pb-20'>
-        <div className='bg-white border-b sticky top-0 z-20'>
-          <div className='max-w-[1188px] mx-auto px-3 md:px-0 h-[50px] flex items-center justify-between'>
-            <div className='flex items-center text-[13px] overflow-hidden'>
-              <Link href="/" className='text-[#666] hover:text-[#F85606] whitespace-nowrap'>Home</Link>
-              <span className='mx-2 text-gray-300'>/</span>
-              <Link href="/category" className='text-[#666] hover:text-[#F85606] whitespace-nowrap'>Categories</Link>
-              <span className='mx-2 text-gray-300'>/</span>
-              <h1 className='font-bold text-[#212121] text-[13px] md:text-[14px] capitalize truncate'>{categoryName} - {totalProducts} Items</h1>
+      <div className='bg-[#f5f5f7] min-h-screen'>
+        {/* Breadcrumb */}
+        <div className='bg-white border-b sticky top-0 z-20 shadow-sm'>
+          <div className='max-w-[1320px] mx-auto px-4 h-[48px] flex items-center justify-between'>
+            <div className='flex items-center gap-2 text-[13px]'>
+              <Link href="/" className='text-[#666] hover:text-[#f85606]'>Home</Link>
+              <span className='text-[#ccc]'>›</span>
+              <Link href="/category" className='text-[#666] hover:text-[#f85606]'>Categories</Link>
+              <span className='text-[#ccc]'>›</span>
+              <span className='font-bold text-[#111] capitalize'>{categoryName}</span>
+              <span className='ml-2 bg-[#f5f5f5] px-2 py-0.5 rounded-full text-[11px] font-bold'>{totalCount} items</span>
             </div>
-            <div className='hidden md:flex items-center gap-3 text-[11px] text-gray-500'>
-              <span>Share:</span>
-              <a href={`https://www.facebook.com/sharer/sharer.php?u=https://www.baharaz.com/category/${decodedSlug}`} target="_blank" className='w-6 h-6 bg-[#1877F2] text-white rounded-full flex items-center justify-center'>f</a>
-              <a href={`https://twitter.com/intent/tweet?url=https://www.baharaz.com/category/${decodedSlug}&text=${categoryName} at Baharaz`} target="_blank" className='w-6 h-6 bg-black text-white rounded-full flex items-center justify-center'>X</a>
+            <div className='hidden md:flex items-center gap-2 text-[11px] text-[#666]'>
+              <span>✓ Free Delivery</span><span className='w-1 h-1 bg-gray-300 rounded-full'></span><span>✓ Cash on Delivery</span>
             </div>
           </div>
         </div>
 
-        <div className='max-w-[1188px] mx-auto p-2 md:p-3'>
-          <div className='bg-gradient-to-r from-[#1a1a1a] via-[#333] to-[#F85606] rounded-[16px] md:rounded-[20px] p-4 md:p-6 text-white mb-3 relative overflow-hidden'>
-            <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-white/10 rounded-full blur-[60px]"></div>
-            <div className='relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-4'>
-              <div className='flex items-center gap-4'>
-                <div className='w-[60px] h-[60px] md:w-[72px] md:h-[72px] bg-white/20 backdrop-blur rounded-[16px] flex items-center justify-center text-[32px] font-black border border-white/20'>
-                  {categoryName.charAt(0).toUpperCase()}
-                </div>
-                <div>
-                  <h2 className='font-black text-[20px] md:text-[28px] capitalize leading-tight'>{categoryName}</h2>
-                  <p className='text-[12px] md:text-[13px] opacity-90 mt-1'>{totalProducts} Products Found • Best Price in Bangladesh • Fast Delivery • Cash on Delivery</p>
-                  <div className='flex gap-2 mt-2'>
-                    <span className='bg-white/20 backdrop-blur text-[10px] px-2.5 py-1 rounded-full border border-white/20'>✓ Best Price</span>
-                    <span className='bg-white/20 backdrop-blur text-[10px] px-2.5 py-1 rounded-full border border-white/20'>✓ Free Delivery</span>
-                    <span className='bg-white/20 backdrop-blur text-[10px] px-2.5 py-1 rounded-full border border-white/20'>✓ Warranty</span>
-                  </div>
-                </div>
-              </div>
-              <div className='flex gap-2'>
-                <Link href="/category" className='bg-white text-black px-5 py-3 rounded-full text-[12px] font-black hover:bg-gray-100 transition shadow-lg'>All Categories →</Link>
-              </div>
-            </div>
-          </div>
-
-          <div className='bg-white rounded-[12px] border p-3 md:p-4 mb-3 hidden md:block'>
-            <h2 className='font-bold text-[14px] text-[#212121]'>Buy {categoryName} Online at Best Price in Bangladesh - Baharaz</h2>
-            <p className='text-[12px] text-[#666] mt-1 leading-[18px]'>
-              Looking for {categoryName} price in Bangladesh? Baharaz is the best online shopping site in Bangladesh for {categoryName}. Shop from a huge collection of {categoryName} - {relatedCategories.map(c=>c.name).join(', ')} and more. Get best deals, discounts, and offers on {categoryName} with fast delivery all over Bangladesh. Cash on Delivery available. Daraz alternative with better price. Shop now at Baharaz.com!
-            </p>
-          </div>
-
-          {products.length === 0? (
-            <div className='bg-white p-10 md:p-16 text-center rounded-[16px] border shadow-sm'>
-              <div className='w-[80px] h-[80px] bg-[#FFF3E8] rounded-full flex items-center justify-center mx-auto text-[32px]'>📦</div>
-              <h3 className='font-black text-[18px] md:text-[20px] mt-4'>No Products In {categoryName} Yet</h3>
-              <p className='text-[12px] text-gray-500 mt-2'>We are adding new products. Explore other categories.</p>
-              <div className='flex gap-2 justify-center mt-6 flex-wrap max-w-[600px] mx-auto'>
-                {relatedCategories.map(rc => (
-                  <Link key={rc.slug} href={`/category/${rc.slug}`} className='bg-[#F5F5F5] hover:bg-[#F85606] hover:text-white border rounded-full px-4 py-2 text-[12px] font-medium transition'>
-                    {rc.name} ({rc.count})
-                  </Link>
-                ))}
-              </div>
-              <Link href="/" className='inline-block mt-6 bg-[#F85606] text-white px-8 py-3 rounded-full text-[13px] font-black'>Continue Shopping</Link>
-            </div>
-          ) : (
-            <>
-              <div className='bg-white rounded-[12px] border p-2.5 mb-3 flex flex-wrap items-center justify-between gap-2'>
-                <div className='flex items-center gap-2 text-[12px]'>
-                  <span className='font-bold'>{totalProducts} Items</span>
-                  <span className='text-gray-400'>in</span>
-                  <span className='font-bold text-[#F85606] capitalize'>{categoryName}</span>
-                </div>
-                <div className='flex items-center gap-2'>
-                  <span className='text-[11px] text-gray-500'>Sort:</span>
-                  <select className='border rounded-full px-3 py-1.5 text-[11px] bg-[#F5F5F5]'>
-                    <option>Best Match</option>
-                    <option>Price Low to High</option>
-                    <option>Price High to Low</option>
-                    <option>Newest</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className='grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2 md:gap-3'>
-                {products.map(p => {
-                  const img = getProductImage(p)
-                  const price = p.price || p.current_price || p.sale_price || 0
-                  const title = p.title || p.name || 'Product'
-                  const oldPrice = p.original_price || p.old_price || p.compare_price || 0
-                  const discount = oldPrice > price? Math.round(((oldPrice - price) / oldPrice) * 100) : 0
-                  const rating = (4 + Math.random()).toFixed(1)
-                  const sold = p.sold_count || p.sales || Math.floor(Math.random() * 500) + 10
-                  return (
-                    <Link key={p.id} href={`/product/${p.slug || p.id}`} className='group bg-white rounded-[12px] md:rounded-[14px] border border-gray-100 hover:border-[#F85606]/20 p-2 md:p-2.5 block hover:shadow-[0_16px_32px_rgba(0,0,0,0.10)] hover:-translate-y-[2px] transition-all duration-300 relative overflow-hidden'>
-                      {discount > 0 && (
-                        <span className='absolute top-2 left-2 bg-[#F85606] text-white text-[10px] font-black px-[6px] py-[2px] rounded-full z-10 shadow'>
-                          -{discount}%
-                        </span>
-                      )}
-                      <div className='h-[180px] md:h-[200px] flex items-center justify-center bg-white rounded-[10px] p-3 overflow-hidden border border-[#f5f5f5]'>
-                        <img src={img} alt={`${title} - ${categoryName} - Baharaz`} loading="lazy" className='max-h-[150px] md:max-h-[170px] max-w-full object-contain group-hover:scale-110 transition-transform duration-700 ease-out' />
-                      </div>
-                      <div className='mt-2.5'>
-                        <h3 className='text-[12px] md:text-[13px] leading-[16px] line-clamp-2 h-[32px] text-[#212121] group-hover:text-[#F85606] transition-colors'>
-                          {title}
-                        </h3>
-                        <div className='mt-2 flex items-end gap-1.5'>
-                          <span className='text-[#F85606] font-black text-[16px] md:text-[18px] leading-none'>৳{Number(price).toLocaleString()}</span>
-                          {oldPrice > 0 && <span className='text-[11px] text-gray-400 line-through'>৳{Number(oldPrice).toLocaleString()}</span>}
-                        </div>
-                        <div className='flex items-center justify-between mt-2'>
-                          <span className='text-[11px] text-[#FFA500]'>★ {rating} <span className='text-gray-400'>({sold})</span></span>
-                          <span className='text-[10px] bg-[#FFF3E8] text-[#F85606] px-1.5 py-0.5 rounded-full font-bold'>{sold}+ Sold</span>
-                        </div>
-                        <div className='mt-1 text-[10px] text-gray-400 truncate'>{p.category} • Free Delivery</div>
-                      </div>
-                    </Link>
-                  )
-                })}
-              </div>
-
-              <div className='bg-white rounded-[16px] border p-4 md:p-6 mt-4'>
-                <h3 className='font-black text-[14px] md:text-[16px]'>Related Categories - Shop More at Baharaz</h3>
-                <div className='grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-2 mt-4'>
-                  {relatedCategories.map(rc => (
-                    <Link key={rc.slug} href={`/category/${rc.slug}`} className='border rounded-[10px] p-3 hover:border-[#F85606] hover:bg-[#FFF8F3] transition group'>
-                      <p className='font-bold text-[12px] group-hover:text-[#F85606] capitalize'>{rc.name}</p>
-                      <p className='text-[11px] text-gray-500 mt-1'>{rc.count} Products</p>
-                    </Link>
+        <div className='max-w-[1320px] mx-auto p-2 md:p-4'>
+          <div className='grid grid-cols-1 lg:grid-cols-[240px_1fr] gap-4'>
+            {/* LEFT SIDEBAR - NEW FEATURE */}
+            <div className='hidden lg:block space-y-3'>
+              <div className='bg-white rounded-2xl border p-4'>
+                <h3 className='font-black text-[13px] mb-3'>Categories</h3>
+                <div className='space-y-1'>
+                  <Link href="/category/all" className={`block text-[12px] px-3 py-2 rounded-xl ${decodedSlug==='all'?'bg-[#111] text-white font-bold':'hover:bg-gray-50'}`}>All Products</Link>
+                  {allCategories.slice(0,10).map(c=>(
+                    <Link key={c.slug} href={`/category/${c.slug}`} className={`block text-[12px] px-3 py-2 rounded-xl capitalize ${c.slug===decodedSlug?'bg-[#f85606] text-white font-bold':'hover:bg-gray-50'}`}>{c.name}</Link>
                   ))}
                 </div>
-                <div className='mt-6 pt-6 border-t'>
-                  <h4 className='font-bold text-[13px]'>Why Buy {categoryName} from Baharaz?</h4>
-                  <div className='grid md:grid-cols-3 gap-4 mt-3 text-[12px] text-[#666] leading-[18px]'>
-                    <div><span className='font-bold text-[#212121]'>✓ Best Price in BD:</span> We offer lowest {categoryName} price in Bangladesh guaranteed. Compare with Daraz, Pickaboo.</div>
-                    <div><span className='font-bold text-[#212121]'>✓ Fast Delivery:</span> Delivery within 24-72 hours all over Bangladesh. Dhaka, Chittagong, Rajshahi, Khulna, Sylhet.</div>
-                    <div><span className='font-bold text-[#212121]'>✓ Original Products:</span> 100% authentic {categoryName} with warranty. Cash on Delivery, Easy Return.</div>
+              </div>
+
+              <div className='bg-white rounded-2xl border p-4'>
+                <h3 className='font-black text-[13px] mb-3'>Price Range</h3>
+                <div className='grid grid-cols-2 gap-2'>
+                  <Link href={`/category/${slug}?min=0&max=500`} className='text-[11px] border rounded-full px-3 py-2 text-center hover:border-black'>৳0 - 500</Link>
+                  <Link href={`/category/${slug}?min=500&max=1000`} className='text-[11px] border rounded-full px-3 py-2 text-center hover:border-black'>৳500 - 1000</Link>
+                  <Link href={`/category/${slug}?min=1000&max=2000`} className='text-[11px] border rounded-full px-3 py-2 text-center hover:border-black'>৳1000 - 2000</Link>
+                  <Link href={`/category/${slug}?min=2000&max=10000`} className='text-[11px] border rounded-full px-3 py-2 text-center hover:border-black'>৳2000+</Link>
+                </div>
+                <Link href={`/category/${slug}`} className='mt-3 block text-[11px] text-center text-[#f85606] font-bold'>Clear Filter</Link>
+              </div>
+
+              <div className='bg-gradient-to-br from-[#111] to-[#333] rounded-2xl p-4 text-white'>
+                <p className='font-black text-[13px]'>Why Baharaz?</p>
+                <ul className='mt-2 space-y-1.5 text-[11px] opacity-80'>
+                  <li>✓ Best Price Guaranteed</li>
+                  <li>✓ Cash on Delivery</li>
+                  <li>✓ 7 Days Return</li>
+                  <li>✓ Fast Delivery All BD</li>
+                  <li>✓ 100% Authentic</li>
+                </ul>
+              </div>
+            </div>
+
+            {/* RIGHT CONTENT */}
+            <div className='space-y-3'>
+              {/* HERO - NEW DESIGN */}
+              <div className="bg-gradient-to-r from-[#0f0f0f] via-[#2a2a2a] to-[#f85606] rounded-[20px] p-5 md:p-6 text-white relative overflow-hidden shadow-lg">
+                <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-white/10 rounded-full -mr-20 -mt-20 blur-3xl"></div>
+                <div className="absolute bottom-0 left-0 w-[200px] h-[200px] bg-black/20 rounded-full -ml-20 -mb-20 blur-2xl"></div>
+                <div className="relative z-10 flex flex-col md:flex-row justify-between gap-4">
+                  <div className="flex gap-4 items-center">
+                    <div className="w-[56px] h-[56px] bg-white/10 backdrop-blur rounded-2xl flex items-center justify-center text-[26px] border border-white/20">{categoryName.charAt(0).toUpperCase()}</div>
+                    <div>
+                      <h1 className="font-black text-[22px] md:text-[26px] capitalize leading-none">{categoryName}</h1>
+                      <p className="text-[12px] opacity-70 mt-1.5">{totalCount} Products Found • Best Price in Bangladesh • Daraz Alternative</p>
+                      <div className='flex gap-2 mt-2'>
+                        <span className='text-[10px] bg-white/15 px-2.5 py-1 rounded-full border border-white/20'>Free Delivery</span>
+                        <span className='text-[10px] bg-white/15 px-2.5 py-1 rounded-full border border-white/20'>Cash on Delivery</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className='flex items-center gap-2'>
+                    <Link href="/category" className="bg-white text-black px-5 py-2.5 rounded-full text-[12px] font-black hover:bg-black hover:text-white transition">All Categories</Link>
                   </div>
                 </div>
               </div>
-            </>
-          )}
+
+              {/* FILTER BAR - NEW */}
+              <div className="bg-white rounded-2xl p-3 border shadow-sm flex flex-col md:flex-row justify-between gap-3">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-[11px] font-black tracking-widest">SORT BY:</span>
+                  <Link href={`/category/${slug}?sort=newest`} className={`text-[11px] px-4 py-2 rounded-full border-2 font-bold transition ${sortBy==='newest'? 'bg-black text-white border-black':'bg-white hover:border-black'}`}>Newest</Link>
+                  <Link href={`/category/${slug}?sort=popular`} className={`text-[11px] px-4 py-2 rounded-full border-2 font-bold transition ${sortBy==='popular'? 'bg-black text-white border-black':'bg-white hover:border-black'}`}>Popular</Link>
+                  <Link href={`/category/${slug}?sort=price_low`} className={`text-[11px] px-4 py-2 rounded-full border-2 font-bold transition ${sortBy==='price_low'? 'bg-black text-white border-black':'bg-white hover:border-black'}`}>Low to High</Link>
+                  <Link href={`/category/${slug}?sort=price_high`} className={`text-[11px] px-4 py-2 rounded-full border-2 font-bold transition ${sortBy==='price_high'? 'bg-black text-white border-black':'bg-white hover:border-black'}`}>High to Low</Link>
+                </div>
+                <div className='flex items-center gap-2'>
+                  <span className="text-[11px] bg-[#fff4e5] text-[#ff6a00] px-3 py-1.5 rounded-full font-black border">{totalCount} Products</span>
+                  <span className='text-[11px] text-[#666] hidden md:block'>All over Bangladesh</span>
+                </div>
+              </div>
+
+              {/* SEO TEXT */}
+              <div className='bg-white rounded-2xl border p-4'>
+                <h2 className='font-black text-[14px]'>Buy {categoryName} Online at Best Price in Bangladesh - Baharaz</h2>
+                <p className='text-[12px] text-[#555] mt-1.5 leading-5'>Looking for {categoryName} price in Bangladesh? Baharaz offers huge collection of {categoryName} with best deals, fast delivery, cash on delivery. Shop {categoryName} like Mobile, Fashion, Electronics & more at lowest price. #1 Daraz alternative in Bangladesh.</p>
+              </div>
+
+              {/* PRODUCTS */}
+              {products.length === 0? (
+                <div className='bg-white p-10 md:p-16 text-center rounded-[20px] shadow-sm border'>
+                  <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto text-[40px]">📦</div>
+                  <p className='font-black text-[20px] capitalize mt-4'>No Products in {categoryName} Yet</p>
+                  <p className='text-[13px] text-[#666] mt-2 max-w-[480px] mx-auto'>This category is empty now. But you can explore other trending categories. This page will never show 404.</p>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mt-8 max-w-[600px] mx-auto">
+                    {relatedCats.slice(0,8).map(rc=>(
+                      <Link key={rc.slug} href={`/category/${rc.slug}`} className="bg-[#fafafa] border-2 rounded-2xl p-4 hover:border-black hover:bg-white hover:shadow-lg transition group">
+                        <p className="font-black text-[12px] capitalize group-hover:text-[#f85606]">{rc.name}</p>
+                        <p className="text-[10px] text-gray-500 mt-1">Explore →</p>
+                      </Link>
+                    ))}
+                  </div>
+                  <div className="flex gap-3 justify-center mt-8">
+                    <Link href="/category" className='bg-[#f5f5f5] border-2 px-6 py-3 rounded-full text-[13px] font-black hover:bg-black hover:text-white transition'>Browse Categories</Link>
+                    <Link href="/" className='bg-[#f85606] text-white px-8 py-3 rounded-full text-[13px] font-black hover:bg-black transition'>Go to Home</Link>
+                  </div>
+                </div>
+              ) : (
+                <div className='grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3'>
+                  {products.map(p => {
+                    const discount = getDiscount(p)
+                    const img = getImage(p)
+                    return (
+                      <Link key={p.id} href={`/product/${p.slug || p.id}`} className='bg-white p-3 rounded-[16px] block hover:shadow-[0_12px_32px_rgba(0,0,0,0.12)] hover:-translate-y-1 transition-all duration-300 border-2 border-transparent hover:border-black group relative overflow-hidden'>
+                        {discount>0 && <span className="absolute top-3 left-3 z-10 bg-[#ff3b30] text-white text-[10px] font-black px-2 py-1 rounded-full shadow">-{discount}%</span>}
+                        <span className='absolute top-3 right-3 z-10 bg-black text-white text-[9px] font-bold px-2 py-0.5 rounded-full opacity-0 group-hover:opacity-100 transition'>TRENDING</span>
+                        <div className="h-[180px] md:h-[190px] flex items-center justify-center bg-[#fafafa] rounded-[12px] p-3 overflow-hidden">
+                          <img src={img} alt={`${p.title || p.name} - ${categoryName}`} loading="lazy" className='max-h-full max-w-full object-contain group-hover:scale-110 transition duration-700'/>
+                        </div>
+                        <p className='text-[12px] mt-3 line-clamp-2 h-[34px] leading-[17px] font-medium group-hover:text-[#f85606] transition'>{p.title || p.name}</p>
+                        <div className='flex items-baseline gap-2 mt-2'>
+                          <p className='text-[#111] font-black text-[16px]'>৳{Number(p.price).toLocaleString()}</p>
+                          {p.original_price> p.price && <p className='text-[11px] text-[#999] line-through'>৳{Number(p.original_price).toLocaleString()}</p>}
+                        </div>
+                        <div className="flex justify-between items-center mt-2">
+                          <span className="text-[11px] bg-[#fff7e6] text-[#ff8c00] px-2 py-0.5 rounded-full font-bold">★ {p.rating || '4.8'}</span>
+                          <span className="text-[10px] text-[#888]">{p.sold_count || 120}+ Sold</span>
+                        </div>
+                        <div className='mt-2.5 h-[32px] bg-[#111] text-white rounded-full flex items-center justify-center text-[11px] font-black opacity-0 group-hover:opacity-100 transition'>View Details →</div>
+                      </Link>
+                    )
+                  })}
+                </div>
+              )}
+
+              {/* BOTTOM SEO */}
+              <div className='bg-white rounded-2xl border p-5 mt-4'>
+                <h3 className='font-black text-[14px]'>Why Buy {categoryName} from Baharaz?</h3>
+                <div className='grid md:grid-cols-3 gap-4 mt-4 text-[12px]'>
+                  <div className='bg-[#fafafa] p-3 rounded-xl'><p className='font-bold'>Best Price</p><p className='text-[#666] mt-1 text-[11px]'>Lowest {categoryName} price in BD guaranteed.</p></div>
+                  <div className='bg-[#fafafa] p-3 rounded-xl'><p className='font-bold'>Fast Delivery</p><p className='text-[#666] mt-1 text-[11px]'>Delivery all over Bangladesh in 2-3 days.</p></div>
+                  <div className='bg-[#fafafa] p-3 rounded-xl'><p className='font-bold'>Authentic Product</p><p className='text-[#666] mt-1 text-[11px]'>100% authentic {categoryName} with warranty.</p></div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </>

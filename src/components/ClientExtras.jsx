@@ -1,28 +1,9 @@
 'use client'
-import { useEffect } from 'react'
-import { createClient } from '@/lib/supabase/client.js'
 import Script from 'next/script'
 
 export default function ClientExtras() {
-  useEffect(() => {
-    const check = async () => {
-      try {
-        const supabase = createClient()
-        const { data } = await supabase.from('app_build').select('last_update').eq('id', 1).single()
-        if (!data) return
-        const saved = localStorage.getItem('baharaz_build')
-        if (saved && saved!== data.last_update) {
-          localStorage.setItem('baharaz_build', data.last_update)
-          window.location.reload()
-        } else if (!saved) {
-          localStorage.setItem('baharaz_build', data.last_update)
-        }
-      } catch {}
-    }
-    check()
-    const interval = setInterval(check, 120000)
-    return () => clearInterval(interval)
-  }, [])
+  // app_build Query এখান থেকে পুরা Remove করে দিলাম!
+  // ওটা শুধু AutoUpdater.jsx Handle করবে - Duplicate 0 হবে!
 
   return (
     <>

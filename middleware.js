@@ -1,5 +1,5 @@
-import { NextResponse } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
+import { NextResponse } from 'next/server'
 
 export async function middleware(request) {
   let supabaseResponse = NextResponse.next({
@@ -27,41 +27,33 @@ export async function middleware(request) {
     }
   )
 
-  const { data: { user } } = await supabase.auth.getUser()
+  // ✅ Session Refresh - Fast + No Flicker
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
   const path = request.nextUrl.pathname
 
-  // Public Routes - সবাই দেখতে পারবে
-  if (path.startsWith('/store/') || path === '/' || path.startsWith('/product/')) {
-    return supabaseResponse
-  }
-
-  // Seller Protected Routes
-  if (path.startsWith('/seller/dashboard') || path.startsWith('/seller/store') || path.startsWith('/seller/products') || path.startsWith('/seller/orders')) {
+  // Seller Protected
+  if (
+    path.startsWith('/seller/dashboard') ||
+    path.startsWith('/seller/products') ||
+    path.startsWith('/seller/orders') ||
+    path.startsWith('/seller/store')
+  ) {
     if (!user) {
       const url = request.nextUrl.clone()
       url.pathname = '/seller'
       return NextResponse.redirect(url)
     }
-
-    // Role Check - Customer হলে Seller Dashboard এ ঢুকতে পারবে না
-    const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).maybeSingle()
-    const { data: seller } = await supabase.from('sellers').select('id').eq('user_id', user.id).maybeSingle()
-
-    const isSeller = profile?.role === 'seller' || !!seller
-
-    // Customer কে Seller Dashboard এ ঢুকতে দিবে না, Home এ পাঠাবে
-    if (!isSeller) {
-      const url = request.nextUrl.clone()
-      url.pathname = '/'
-      return NextResponse.redirect(url)
-    }
   }
 
-  // Customer Protected Routes (Optional)
-  if (path.startsWith('/account') || path.startsWith('/checkout')) {
+  // Buyer Protected
+  if (path.startsWith('/checkout') || path.startsWith('/account')) {
     if (!user) {
       const url = request.nextUrl.clone()
       url.pathname = '/login'
+      url.searchParams.set('next', path)
       return NextResponse.redirect(url)
     }
   }
@@ -69,8 +61,12 @@ export async function middleware(request) {
   return supabaseResponse
 }
 
+// ✅ FAST - শুধু Protected Route এ Middleware চলবে, Home Page এ না - তাই 0s Load
 export const config = {
   matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    '/seller/:path*',
+    '/checkout/:path*',
+    '/account/:path*',
+    '/wishlist/:path*',
   ],
 }

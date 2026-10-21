@@ -1,25 +1,25 @@
-﻿// Baharaz Algolia - Turbopack Safe Version
+﻿// Baharaz Algolia - Turbopack Safe Version - FIXED
 let searchClient;
 let searchIndex;
 
 const appId = process.env.NEXT_PUBLIC_ALGOLIA_APP_ID;
-const searchKey = process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_KEY;
+// FIX: _API_ যুক্ত করেছি - আপনার .env এর সাথে মিলবে
+const searchKey = process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY || process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_KEY;
 export const ALGOLIA_INDEX_NAME = process.env.NEXT_PUBLIC_ALGOLIA_INDEX_NAME || 'baharaz_products';
 
 // Turbopack Safe Init
 try {
-  // v4 এর জন্য default import
   const algoliasearch = require('algoliasearch/lite');
   const clientFn = algoliasearch.default || algoliasearch;
   
   if (appId && searchKey && typeof clientFn === 'function') {
     searchClient = clientFn(appId, searchKey);
     searchIndex = searchClient.initIndex(ALGOLIA_INDEX_NAME);
+    console.log('✅ Algolia Live Mode:', ALGOLIA_INDEX_NAME);
   } else {
     throw new Error('Missing ENV');
   }
 } catch (e) {
-  // Build Time এ Crash করবে না - Dummy Client
   console.log('Algolia Dummy Mode:', e.message);
   searchClient = {
     search: async () => ({ results: [{ hits: [] }] }),
@@ -44,8 +44,6 @@ export const searchProducts = async (query) => {
 };
 
 export const getAdminIndex = () => searchIndex;
-
-// --- FIX FOR VERCEL BUILD - Missing export ---
 export const syncProductsToAlgolia = async (products) => {
   console.log('Syncing', products?.length || 0, 'products to Algolia (dummy)');
   return { objectIDs: [] };
