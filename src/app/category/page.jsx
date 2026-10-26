@@ -2,9 +2,9 @@ import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import Script from 'next/script'
 
-export const revalidate = 3600 // ✅ FIX: force-dynamic ছিল Slow - এখন 1 Hour Cache = Zero Second + Future সব থাকবে Live
+export const revalidate = 3600
+export const dynamic = 'force-static'
 
-// ================= 100% SEO PREMIUM - GOOGLE 1st PAGE =================
 export async function generateMetadata() {
   const title = 'All Categories - Shop 100+ Categories at Best Price in Bangladesh | Baharaz'
   const description = 'Browse all categories at Baharaz - Electronics, Fashion, Mobiles, Home & Living, Health & Beauty, Groceries, Kids & Toys, Sports. Best price in Bangladesh. Fast delivery, Cash on Delivery, Daraz alternative #1. Trusted by 10,000+ customers.'
@@ -38,55 +38,62 @@ export async function generateMetadata() {
 export default async function CategoriesPage(){
   const supabase = await createClient()
   let cats = []
-  let productCounts = {}
+  let productCounts: Record<string, number> = {}
   let totalProducts = 0
-  let featuredCats = []
+  let featuredCats: any[] = []
 
   try{
-    // ✅ FIX: আগে limit 10000 ছিল Slow - এখন Fast Query - Future Same
     const [countRes, prodRes, catTableRes] = await Promise.all([
       supabase.from('products').select('id', { count: 'exact', head: true }),
       supabase.from('products').select('category').limit(2000),
-      supabase.from('categories').select('id, name, slug, image_url, description, is_featured').order('name')
+      supabase.from('categories').select('id, name, slug, image_url, description, is_featured').order('name').limit(100)
     ])
 
-    if(countRes.count) totalProducts = countRes.count
+    totalProducts = countRes.count || 0
 
     const prod = prodRes.data
-    if(prod){
-      prod.forEach(p=>{
-        if(p.category){
-          const key = p.category.toLowerCase().trim()
-          productCounts[key] = (productCounts[key]||0)+1
-        }
-      })
-      const unique = [...new Set(prod.map(p=>p.category).filter(Boolean))]
-      cats = unique.map((name,i)=>({id:i+100, name: name.trim(), slug: name.toLowerCase().replace(/\s+/g,'-').replace(/&/g,'and').replace(/[^a-z0-9-]/g,''), image_url: null, description: `${name} - Best deals in Baharaz` }))
+    if(prod && prod.length){
+      const map = new Map<string, number>()
+      for(let i=0;i<prod.length;i++){
+        const c = prod[i]?.category
+        if(!c) continue
+        const key = c.toLowerCase().trim()
+        map.set(key, (map.get(key)||0)+1)
+      }
+      productCounts = Object.fromEntries(map)
+      const uniqueNames = [...new Set(prod.map(p=>p.category?.trim()).filter(Boolean) as string[])]
+      cats = uniqueNames.map((name,i)=>({
+        id:i+100, 
+        name: name.trim(), 
+        slug: name.toLowerCase().replace(/\s+/g,'-').replace(/&/g,'and').replace(/[^a-z0-9-]/g,''), 
+        image_url: null, 
+        description: `${name} - Best deals in Baharaz`
+      }))
     }
 
     const catTable = catTableRes.data
     if(catTable && catTable.length>0){
-      const tableMap = {}
-      catTable.forEach(c=>{ tableMap[c.name.toLowerCase()] = c })
-      cats.forEach(c=>{
+      const tableMap: Record<string, any> = {}
+      for(const c of catTable){ tableMap[c.name.toLowerCase()] = c }
+      for(const c of cats){
         if(!tableMap[c.name.toLowerCase()]){
           tableMap[c.name.toLowerCase()] = c
         }
-      })
-      cats = Object.values(tableMap).map(c=>({
-      ...c,
+      }
+      cats = Object.values(tableMap).map((c:any)=>({
+        ...c,
         count: productCounts[c.name?.toLowerCase()] || productCounts[c.name?.toLowerCase().trim()] || 0,
         is_featured: c.is_featured || (productCounts[c.name?.toLowerCase()] > 2)
       }))
-      cats = cats.sort((a,b)=> b.count - a.count)
-      featuredCats = cats.filter(c=>c.is_featured).slice(0,4)
+      cats.sort((a,b)=> b.count - a.count)
+      featuredCats = cats.filter((c:any)=>c.is_featured).slice(0,4)
       if(featuredCats.length===0) featuredCats = cats.slice(0,4)
     }else{
-      cats = cats.map(c=>({...c, count: productCounts[c.name?.toLowerCase()] || 0, is_featured: (productCounts[c.name?.toLowerCase()] > 1) }))
-      cats = cats.sort((a,b)=> b.count - a.count)
+      cats = cats.map((c:any)=>({...c, count: productCounts[c.name?.toLowerCase()] || 0, is_featured: (productCounts[c.name?.toLowerCase()] > 1) }))
+      cats.sort((a,b)=> b.count - a.count)
       featuredCats = cats.slice(0,4)
     }
-  }catch(e){ console.log('CategoriesPage Error:', e.message) }
+  }catch(e:any){ console.log('CategoriesPage Error:', e.message) }
 
   if(cats.length===0){
     cats = [
@@ -99,7 +106,7 @@ export default async function CategoriesPage(){
       {id:7, name:'Kids & Toys', slug:'kids-toys', count: 8, is_featured: false, description: 'Toys, Baby Products', image_url: null},
       {id:8, name:'Sports & Outdoors', slug:'sports', count: 6, is_featured: false, description: 'Sports, Fitness, Travel', image_url: null},
     ]
-    featuredCats = cats.filter(c=>c.is_featured)
+    featuredCats = cats.filter((c:any)=>c.is_featured)
   }
 
   const breadcrumbSchema = {
@@ -121,7 +128,7 @@ export default async function CategoriesPage(){
     mainEntity: {
       '@type': 'ItemList',
       numberOfItems: cats.length,
-      itemListElement: cats.slice(0, 50).map((c, idx) => ({
+      itemListElement: cats.slice(0, 50).map((c:any, idx:number) => ({
         '@type': 'ListItem',
         position: idx + 1,
         url: `https://www.baharaz.com/category/${c.slug}`,
@@ -139,7 +146,7 @@ export default async function CategoriesPage(){
     ]
   }
 
-  const getIcon = (name) => {
+  const getIcon = (name:string) => {
     const n = name.toLowerCase()
     if(n.includes('elect')) return '🔌'
     if(n.includes('fash')) return '👗'
@@ -156,7 +163,7 @@ export default async function CategoriesPage(){
     return '🛍️'
   }
 
-  const getGradient = (index) => {
+  const getGradient = (index:number) => {
     const gradients = [
       'from-[#FF6B6B] to-[#EE5A24]',
       'from-[#4834D4] to-[#686DE0]',
@@ -291,9 +298,9 @@ export default async function CategoriesPage(){
 
           <div className="bg-white rounded-2xl border-2 p-5 mt-4">
             <h3 className="font-black text-[15px]">Shop by Category at Baharaz - Best Online Shopping in Bangladesh</h3>
-            <p className="text-[12px] text-gray-600 mt-2 leading-6">Baharaz is #1 online shopping site in Bangladesh. Buy electronics, fashion, mobiles, groceries at best price. Fast delivery in Dhaka, Rajshahi, Chittagong, Sylhet. Cash on Delivery, Free Return, Warranty. Daraz alternative with better deals. {cats.slice(0,8).map(c=>c.name).join(', ')} and more - all at lowest price guaranteed. Trusted by 10,000+ customers.</p>
+            <p className="text-[12px] text-gray-600 mt-2 leading-6">Baharaz is #1 online shopping site in Bangladesh. Buy electronics, fashion, mobiles, groceries at best price. Fast delivery in Dhaka, Rajshahi, Chittagong, Sylhet. Cash on Delivery, Free Return, Warranty. Daraz alternative with better deals. {cats.slice(0,8).map((c:any)=>c.name).join(', ')} and more - all at lowest price guaranteed. Trusted by 10,000+ customers.</p>
             <div className='flex flex-wrap gap-2 mt-3'>
-              {cats.slice(0,12).map(c=>(
+              {cats.slice(0,12).map((c:any)=>(
                 <Link key={`tag-${c.slug}`} href={`/category/${c.slug}`} className='text-[11px] bg-[#f5f5f7] border px-3 py-1.5 rounded-full hover:bg-black hover:text-white transition font-bold'>{c.name}</Link>
               ))}
             </div>
