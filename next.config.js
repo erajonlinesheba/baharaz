@@ -1,10 +1,14 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   devIndicators: false,
+  compress: true,
+  poweredByHeader: false,
+  reactStrictMode: true,
   images: {
     formats: ['image/avif', 'image/webp'],
     deviceSizes: [640, 750, 828, 1080, 1200],
     imageSizes: [16, 32, 48, 64, 96],
+    minimumCacheTTL: 86400,
     remotePatterns: [
       { protocol: "https", hostname: "**.supabase.co" },
       { protocol: "https", hostname: "**.amazonaws.com" },
@@ -17,9 +21,6 @@ const nextConfig = {
   },
   eslint: { ignoreDuringBuilds: true },
   typescript: { ignoreBuildErrors: true },
-  experimental: {
-    optimizePackageImports: ['lucide-react', '@supabase/supabase-js'],
-  },
 };
 
 module.exports = nextConfig;

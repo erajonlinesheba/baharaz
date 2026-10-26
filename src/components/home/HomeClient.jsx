@@ -1,53 +1,51 @@
 'use client'
 import dynamic from 'next/dynamic'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
+import Link from 'next/link'
 
-// ✅ FAST - Banner is LCP, so ssr: true for Google #1 - iOS 26 Glass
 const BannerSlider = dynamic(() => import('./BannerSlider'), {
   ssr: true,
   loading: () => (
-    <div className="w-full h-[180px] md:h-[340px] animate-pulse md:rounded-[20px] relative overflow-hidden"
-         style={{
-           background: 'rgba(255,255,255,0.75)',
-           backdropFilter: 'blur(20px) saturate(180%)',
-           WebkitBackdropFilter: 'blur(20px) saturate(180%)',
-           border: '0.5px solid rgba(255,255,255,0.8)',
-           boxShadow: '0 8px 24px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,1)'
-         }}>
-      <div className="absolute inset-0 bg-gradient-to-b from-white/40 to-transparent"></div>
-      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
-        <div className="w-[20px] h-[6px] bg-[#F85606]/30 rounded-full"></div>
-        <div className="w-[6px] h-[6px] bg-black/10 rounded-full"></div>
-        <div className="w-[6px] h-[6px] bg-black/10 rounded-full"></div>
+    <div className="w-full h-[180px] md:h-[344px] bg-[#e5e5e5] animate-pulse md:rounded-[4px]"></div>
+  )
+})
+
+const FlashSale = dynamic(() => import('./FlashSale'), {
+  ssr: true,
+  loading: () => (
+    <div className="w-full bg-white md:rounded-[4px] p-4">
+      <div className="h-6 w-32 bg-gray-200 animate-pulse mb-4"></div>
+      <div className="grid grid-cols-2 md:grid-cols-6 gap-0 border border-[#e5e5e5]">
+        {Array.from({length:6}).map((_,i)=> (
+          <div key={i} className="h-[220px] bg-gray-50 animate-pulse border-r border-b border-[#e5e5e5]"></div>
+        ))}
       </div>
     </div>
   )
 })
 
-// ✅ Others - Lazy but Prefetched - Zero Second - iOS 26 Glass
-const FlashSale = dynamic(() => import('./FlashSale'), {
-  ssr: false,
+const DailySheraDeals = dynamic(() => import('./DailySheraDeals'), {
+  ssr: true,
   loading: () => (
-    <div className="w-full rounded-[20px] p-4 relative overflow-hidden"
-         style={{
-           background: 'rgba(255,255,255,0.75)',
-           backdropFilter: 'blur(20px) saturate(180%)',
-           WebkitBackdropFilter: 'blur(20px) saturate(180%)',
-           border: '0.5px solid rgba(255,255,255,0.8)',
-           boxShadow: '0 8px 24px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,1)'
-         }}>
-      <div className="absolute top-0 inset-x-0 h-[0.5px] bg-gradient-to-r from-transparent via-[#F85606]/20 to-transparent"></div>
-      <div className="h-6 w-32 bg-black/10 rounded-full animate-pulse mb-3"></div>
-      <div className="grid grid-cols-3 md:grid-cols-6 gap-3">
+    <div className="w-full bg-white md:rounded-[4px] p-4">
+      <div className="h-6 w-48 bg-gray-200 animate-pulse mb-4"></div>
+      <div className="grid grid-cols-2 md:grid-cols-6 gap-0 border border-[#e5e5e5]">
         {Array.from({length:6}).map((_,i)=> (
-          <div key={i} className="h-[140px] rounded-[16px] animate-pulse relative overflow-hidden"
-               style={{
-                 background: 'rgba(255,255,255,0.8)',
-                 border: '0.5px solid rgba(0,0,0,0.04)',
-                 boxShadow: 'inset 0 1px 0 rgba(255,255,255,1)'
-               }}>
-            <div className="absolute inset-0 bg-gradient-to-b from-white/40 to-transparent"></div>
-          </div>
+          <div key={i} className="h-[220px] bg-gray-50 animate-pulse border-r border-b border-[#e5e5e5]"></div>
+        ))}
+      </div>
+    </div>
+  )
+})
+
+const TopRanking = dynamic(() => import('./TopRanking'), {
+  ssr: true,
+  loading: () => (
+    <div className="w-full bg-white md:rounded-[4px] p-4">
+      <div className="h-6 w-32 bg-gray-200 animate-pulse mb-4"></div>
+      <div className="flex gap-3">
+        {Array.from({length:6}).map((_,i)=> (
+          <div key={i} className="min-w-[188px] h-[220px] bg-gray-50 animate-pulse"></div>
         ))}
       </div>
     </div>
@@ -55,59 +53,39 @@ const FlashSale = dynamic(() => import('./FlashSale'), {
 })
 
 const Categories = dynamic(() => import('./Categories'), {
-  ssr: false,
+  ssr: true,
   loading: () => (
-    <div className="w-full rounded-[20px] p-4 relative overflow-hidden"
-         style={{
-           background: 'rgba(255,255,255,0.75)',
-           backdropFilter: 'blur(20px) saturate(180%)',
-           WebkitBackdropFilter: 'blur(20px) saturate(180%)',
-           border: '0.5px solid rgba(255,255,255,0.8)',
-           boxShadow: '0 8px 24px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,1)'
-         }}>
-      <div className="absolute top-0 inset-x-0 h-[0.5px] bg-gradient-to-r from-transparent via-black/[0.04] to-transparent"></div>
-      <div className="h-5 w-24 bg-black/10 rounded-full animate-pulse mb-3"></div>
-      <div className="grid grid-cols-4 md:grid-cols-8 gap-3">
-        {Array.from({length:8}).map((_,i)=> (
-          <div key={i} className="h-[70px] rounded-[20px] animate-pulse relative overflow-hidden"
-               style={{
-                 background: 'linear-gradient(135deg, rgba(255,255,255,0.9), rgba(245,243,240,0.8))',
-                 border: '0.5px solid rgba(255,255,255,0.8)',
-                 boxShadow: '0 4px 16px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,1)'
-               }}>
-            <div className="absolute inset-0 bg-gradient-to-b from-white/40 to-transparent rounded-[20px]"></div>
-          </div>
+    <div className="w-full bg-white md:rounded-[4px] p-4">
+      <div className="h-6 w-24 bg-gray-200 animate-pulse mb-4"></div>
+      <div className="grid grid-cols-4 md:grid-cols-8 gap-0 border border-[#e5e5e5]">
+        {Array.from({length:16}).map((_,i)=> (
+          <div key={i} className="h-[148px] bg-gray-50 animate-pulse border-r border-b border-[#e5e5e5]"></div>
         ))}
       </div>
     </div>
   )
 })
 
-const JustForYou = dynamic(() => import('./JustForYou'), {
+const JustForYouMobile = dynamic(() => import('./JustForYouMobile'), {
   ssr: false,
   loading: () => (
-    <div className="w-full rounded-[20px] p-4 relative overflow-hidden"
-         style={{
-           background: 'rgba(255,255,255,0.75)',
-           backdropFilter: 'blur(20px) saturate(180%)',
-           WebkitBackdropFilter: 'blur(20px) saturate(180%)',
-           border: '0.5px solid rgba(255,255,255,0.8)',
-           boxShadow: '0 8px 24px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,1)'
-         }}>
-      <div className="absolute top-0 inset-x-0 h-[0.5px] bg-gradient-to-r from-transparent via-black/[0.04] to-transparent"></div>
-      <div className="h-6 w-32 bg-black/10 rounded-full animate-pulse mb-4"></div>
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-        {Array.from({length:10}).map((_,i)=> (
-          <div key={i} className="h-[180px] rounded-[20px] animate-pulse relative overflow-hidden"
-               style={{
-                 background: 'rgba(255,255,255,0.9)',
-                 border: '0.5px solid rgba(0,0,0,0.04)',
-                 boxShadow: '0 8px 24px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,1)'
-               }}>
-            <div className="absolute inset-0 bg-gradient-to-b from-white/60 to-transparent"></div>
-            <div className="absolute bottom-2 left-2 right-2 h-[2px] bg-gradient-to-r from-transparent via-[#F85606]/10 to-transparent"></div>
-          </div>
-        ))}
+    <div className="w-full">
+      <div className="bg-white px-2 py-2 flex gap-2 overflow-x-auto scrollbar-hide mb-[6px]">
+        {Array.from({length:8}).map((_,i)=> <div key={i} className="h-8 w-28 bg-gray-100 animate-pulse rounded-full flex-shrink-0"/>)}
+      </div>
+      <div className="grid grid-cols-2 gap-[6px] p-[6px]">
+        {Array.from({length:12}).map((_,i)=> <div key={i} className="h-[260px] bg-white animate-pulse rounded-[10px]"/>)}
+      </div>
+    </div>
+  )
+})
+
+const JustForYouDesktop = dynamic(() => import('./JustForYouDesktop'), {
+  ssr: false,
+  loading: () => (
+    <div className="w-full">
+      <div className="grid grid-cols-6 gap-3 p-3">
+        {Array.from({length:18}).map((_,i)=> <div key={i} className="h-[260px] bg-white animate-pulse"/>)}
       </div>
     </div>
   )
@@ -115,18 +93,7 @@ const JustForYou = dynamic(() => import('./JustForYou'), {
 
 const BaharazMall = dynamic(() => import('./BaharazMall'), {
   ssr: false,
-  loading: () => (
-    <div className="w-full h-[200px] animate-pulse rounded-[20px] relative overflow-hidden"
-         style={{
-           background: 'rgba(255,255,255,0.75)',
-           backdropFilter: 'blur(20px) saturate(180%)',
-           WebkitBackdropFilter: 'blur(20px) saturate(180%)',
-           border: '0.5px solid rgba(255,255,255,0.8)',
-           boxShadow: '0 8px 24px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,1)'
-         }}>
-      <div className="absolute inset-0 bg-gradient-to-b from-white/40 to-transparent"></div>
-    </div>
-  )
+  loading: () => <div className="w-full h-[200px] bg-white animate-pulse md:rounded-[4px]"></div>
 })
 
 const FloatingSideNav = dynamic(() => import('./FloatingSideNav'), {
@@ -135,109 +102,105 @@ const FloatingSideNav = dynamic(() => import('./FloatingSideNav'), {
 })
 
 export default function HomeClient(){
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
 
   useEffect(()=>{
-    if(typeof window !== 'undefined'){
-      const prefetchImages = () => {
-        if('requestIdleCallback' in window){
-          requestIdleCallback(()=>{
-            try{
-              const lastList = sessionStorage.getItem('baharaz_last_list')
-              if(!lastList){
-                const homeCache = localStorage.getItem('baharaz_home_cache')
-                if(homeCache) sessionStorage.setItem('baharaz_last_list', homeCache)
-              }
-            }catch{}
-          })
-        }
-      }
-      prefetchImages()
-    }
+    try{
+      const token = localStorage.getItem('token') || localStorage.getItem('baharaz_token') || localStorage.getItem('baharaz_user') || sessionStorage.getItem('user')
+      if(token) setIsLoggedIn(true)
+    }catch{}
   }, [])
 
   return (
-    <div className="w-full bg-[#f5f3f0] md:bg-[#f5f5f5] min-h-screen relative">
-      {/* iOS 26 Background Glow - Mobile Only */}
-      <div className="absolute top-0 left-0 w-full h-[400px] pointer-events-none overflow-hidden md:hidden">
-        <div className="absolute -top-[60px] -left-[60px] w-[280px] h-[280px] bg-gradient-to-br from-[#F85606]/12 via-[#FF9500]/8 to-transparent rounded-full blur-[35px]"></div>
-        <div className="absolute -top-[40px] -right-[60px] w-[260px] h-[260px] bg-gradient-to-bl from-[#AF52DE]/10 via-[#5856D6]/6 to-transparent rounded-full blur-[35px]"></div>
-      </div>
+    <div className="w-full bg-[#f5f5f5] min-h-screen">
+      <div className="w-full max-w-[1188px] mx-auto">
+        
+        {/* Banner - Desktop 344px as Daraz */}
+        <div id="top" className="w-full">
+          {!isLoggedIn ? (
+            <>
+              <div className="hidden md:block mt-3">
+                <BannerSlider />
+              </div>
+              <div className="block md:hidden mt-0 w-full h-[76px] bg-gradient-to-r from-[#FFC107] to-[#FF5722] flex items-center justify-center relative">
+                <div className="bg-[#D32F2F] text-white font-black px-3 py-1 rounded-full text-[10px] absolute left-3">SHOP NOW</div>
+                <div className="text-center">
+                  <h2 className="text-white font-black text-[18px]">10.10 Shopping Fest</h2>
+                  <p className="text-white text-[10px] font-bold">9 OCT - 19 OCT • Up to 80% OFF</p>
+                </div>
+              </div>
+            </>
+          ) : null}
+        </div>
 
-      {/* ✅ FIXED - Daraz 1 নম্বর ছবির মতো - Mobile এ Banner MobileHeader থেকে আসবে, তাই এখানে Desktop Only */}
-      <div className="w-full bg-transparent">
-        <div id="top" className="w-full max-w-[1200px] mx-auto px-0 lg:px-4 relative">
-          {/* Desktop Banner Only - Mobile এ MobileHeader এর Banner দেখাবে, Double হবে না */}
-          <div className="w-full hidden md:block"><BannerSlider /></div>
-          
-          {/* 10.10 Fest - Banner এর ঠিক নিচে - Mobile + Desktop */}
-          <div className="w-full mt-0 md:mt-2 h-[90px] md:h-[110px] lg:rounded-[20px] flex items-center overflow-hidden relative"
-               style={{
-                 background: 'linear-gradient(135deg, #FFC107 0%, #FF9500 50%, #FF5722 100%)',
-                 boxShadow: '0 10px 30px rgba(255,87,34,0.25), inset 0 1px 0 rgba(255,255,255,0.3)',
-                 border: '0.5px solid rgba(255,255,255,0.2)'
-               }}>
-             <div className="absolute inset-0 bg-gradient-to-b from-white/15 to-transparent pointer-events-none"></div>
-             <div className="absolute top-0 inset-x-0 h-[0.5px] bg-gradient-to-r from-transparent via-white/40 to-transparent"></div>
-             <div className="absolute left-4 bg-[#D32F2F] text-white font-black px-4 py-1.5 rounded-full text-[11px] shadow-[0_4px_12px_rgba(211,47,47,0.4)] animate-pulse border border-white/20">SHOP NOW</div>
-             <div className="mx-auto text-center relative z-10">
-               <h2 className="text-white font-black text-[20px] md:text-[28px] drop-shadow-[0_2px_8px_rgba(0,0,0,0.2)] tracking-[-0.5px]">10.10 Shopping Fest</h2>
-               <p className="text-white text-[11px] font-bold tracking-widest drop-shadow-[0_1px_2px_rgba(0,0,0,0.2)]">9 OCT 15:00 - 19 OCT • Up to 80% OFF • Zero Second Fast</p>
-             </div>
+        {/* Voucher Strip - Daraz Like */}
+        <div className="w-full mt-0 md:mt-3">
+          <div className="w-full h-[40px] bg-white md:rounded-[4px] flex items-center px-3 justify-between border-b md:border border-[#e5e5e5] md:border-b">
+            <div className="flex items-center gap-2">
+              <span className="text-[12px] font-normal">🎟️ Claim Vouchers to Save More!</span>
+              <span className="hidden md:flex gap-2">
+                <span className="bg-[#fff3e0] text-[#f85606] text-[11px] px-2 py-0.5 rounded">5% OFF</span>
+                <span className="bg-[#e8f5e9] text-[#2e7d32] text-[11px] px-2 py-0.5 rounded">৳80 Free Shipping</span>
+              </span>
+            </div>
+            <span className="text-[12px] font-bold text-[#1a9cb7]">Collect All &gt;</span>
           </div>
         </div>
-      </div>
 
-      {/* Voucher Bar */}
-      <div className="w-full max-w-[1200px] mx-auto px-0 lg:px-4 mt-0 md:mt-3">
-        <div className="w-full h-[42px] bg-white md:rounded-[20px] flex items-center px-3 justify-between border-b md:border border-black/5 relative overflow-hidden"
-             style={{
-               background: 'rgba(255,255,255,0.9)',
-               backdropFilter: 'blur(20px) saturate(180%)',
-               WebkitBackdropFilter: 'blur(20px) saturate(180%)',
-               boxShadow: '0 2px 12px rgba(0,0,0,0.04)'
-             }}>
-          <div className="flex items-center gap-2">
-            <span className="text-[12px] font-black">🎟️ Claim Vouchers to Save More!</span>
-            <span className="hidden md:flex items-center gap-2">
-              <span className="bg-[#FFF3E0] text-[#F85606] text-[10px] font-bold px-2 py-0.5 rounded border border-orange-200">5% OFF</span>
-              <span className="bg-[#E8F5E9] text-[#2E7D32] text-[10px] font-bold px-2 py-0.5 rounded border border-green-200">৳80 Free Shipping</span>
-            </span>
-          </div>
-          <span className="text-[11px] font-bold text-[#F85606]">Collect All →</span>
+        {/* Flash Sale - DESKTOP + MOBILE BOTH */}
+        <div id="flash-sale" className="w-full mt-0 md:mt-4 bg-white md:rounded-[4px] overflow-hidden">
+          <FlashSale />
         </div>
+
+        {/* Categories - DESKTOP ONLY - Phone Hide */}
+        <div id="categories" className="w-full mt-3 md:mt-4 bg-white md:rounded-[4px] overflow-hidden hidden md:block">
+          <div className="px-4 pt-4 pb-0">
+            <h2 className="text-[20px] md:text-[22px] font-normal text-[#424242]">Categories</h2>
+          </div>
+          <div className="mt-3">
+            <Categories />
+          </div>
+        </div>
+
+        {/* Top Ranking - MOBILE ONLY - Desktop Hide */}
+        <div id="top-ranking" className="w-full mt-[6px] md:mt-4 bg-white md:rounded-[4px] overflow-hidden block md:hidden">
+          <TopRanking />
+        </div>
+
+        {/* BaharazMall - MOBILE ONLY - Desktop Hide */}
+        <div id="baharaz-mall" className="w-full mt-[6px] md:mt-4 bg-white md:rounded-[4px] overflow-hidden block md:hidden">
+          <BaharazMall />
+        </div>
+
+        {/* Daily Deals - MOBILE ONLY - Desktop Hide */}
+        <div id="daily-deals" className="w-full mt-[6px] md:mt-4 bg-white md:rounded-[4px] overflow-hidden block md:hidden">
+          <DailySheraDeals />
+        </div>
+
+        {/* Just For You - ALADA ALADA FILE - Phone Alada Desktop Alada */}
+        <div id="just-for-you" className="w-full mt-[6px] md:mt-4">
+          <div className="px-3 md:px-0 mb-2 flex justify-between items-center bg-white md:bg-transparent py-3 md:py-0">
+            <h2 className="text-[16px] md:text-[22px] font-bold md:font-normal text-[#212121] md:text-[#424242]">Just For You</h2>
+            <Link href="/just-for-you" className="text-[#1a9cb7] text-[12px] md:text-[14px] font-medium md:font-normal border border-[#1a9cb7] md:border-[#1a9cb7] px-3 md:px-4 py-1 md:py-1.5 rounded-[2px] hover:bg-[#e3f2fd]">VIEW ALL</Link>
+          </div>
+          {/* Phone - TAB সহ */}
+          <div className="block md:hidden">
+            <JustForYouMobile />
+          </div>
+          {/* Desktop - TAB ছাড়া - Daraz Style */}
+          <div className="hidden md:block">
+            <JustForYouDesktop />
+          </div>
+        </div>
+
+        <div className="w-full h-[80px] md:h-[40px]" />
       </div>
 
-      {/* Flash Sale */}
-      <div id="flash-sale" className="max-w-[1200px] mx-auto mt-3 px-2 lg:px-4 scroll-mt-20 relative">
-        <FlashSale />
-      </div>
-
-      {/* Categories */}
-      <div id="categories" className="max-w-[1200px] mx-auto mt-3 px-2 lg:px-4 scroll-mt-20 relative">
-        <Categories />
-      </div>
-
-      {/* Baharaz Mall */}
-      <div id="baharaz-mall" className="max-w-[1200px] mx-auto mt-3 px-2 lg:px-4 scroll-mt-20 relative">
-        <BaharazMall />
-      </div>
-
-      {/* Just For You */}
-      <div id="just-for-you" className="max-w-[1200px] mx-auto mt-3 px-2 lg:px-4 scroll-mt-20 relative">
-        <JustForYou />
-      </div>
-
-      {/* Footer Spacer */}
-      <div className="w-full h-[120px] block md:hidden bg-transparent" />
-      <div className="w-full h-[40px] hidden md:block bg-transparent" />
-
-      {/* Floating Side Nav */}
       <div className="hidden lg:block">
         <FloatingSideNav />
       </div>
 
       <style>{`
-        * { -webkit-font-smoothing: antialiased; }
         .scrollbar-hide::-webkit-scrollbar { display:none; }
         .scrollbar-hide { -ms-overflow-style:none; scrollbar-width:none; }
       `}</style>

@@ -23,7 +23,7 @@ function SearchPageContent() {
 
   const trendingSearches = ["iPhone 15", "Saree", "Fan", "Watch", "Shoes", "Headphone"];
 
-  // ✅ Recent Search Load
+  // ✅ Recent Search Load - FIXED
   useEffect(() => {
     const saved = localStorage.getItem('baharaz_recent_search');
     if (saved) {
@@ -31,12 +31,14 @@ function SearchPageContent() {
     }
   }, []);
 
-  // ✅ Save Recent Search
+  // ✅ Save Recent Search - FIXED (Infinite Loop ঠিক করলাম)
   useEffect(() => {
     if (q && q.length > 1) {
-      const updated = [q, ...recentSearches.filter(s => s !== q)].slice(0, 5);
-      setRecentSearches(updated);
-      localStorage.setItem('baharaz_recent_search', JSON.stringify(updated));
+      setRecentSearches(prev => {
+        const updated = [q, ...prev.filter(s => s !== q)].slice(0, 5);
+        localStorage.setItem('baharaz_recent_search', JSON.stringify(updated));
+        return updated;
+      });
     }
   }, [q]);
 

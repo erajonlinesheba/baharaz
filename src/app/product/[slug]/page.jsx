@@ -438,13 +438,13 @@ export default function ProductDetailsPage(){
 
   if(!isClient){
     return (
-      <div className="bg-[#f5f5f7] min-h-screen pb-[80px] lg:pb-0">
-        <div className="max-w-[1320px] mx-auto p-4">
-          <div className="bg-white rounded-2xl p-6 animate-pulse">
-            <div className="grid grid-cols-1 lg:grid-cols-[380px_1fr_360px] gap-6">
-              <div className="h-[380px] bg-gray-100 rounded-2xl"></div>
-              <div className="space-y-4"><div className="h-8 bg-gray-100 rounded"></div><div className="h-6 bg-gray-100 rounded w-2/3"></div><div className="h-[120px] bg-gray-100 rounded-2xl"></div></div>
-              <div className="h-[400px] bg-gray-100 rounded-2xl"></div>
+      <div className="w-full bg-[#f5f5f7] min-h-screen pb-[80px] lg:pb-0 overflow-x-hidden">
+        <div className="w-full max-w-[1188px] mx-auto px-0 md:px-4">
+          <div className="bg-white md:rounded-[12px] p-4 animate-pulse">
+            <div className="grid grid-cols-1 lg:grid-cols-[360px_1fr] xl:grid-cols-[380px_1fr_320px] gap-4">
+              <div className="h-[380px] bg-gray-100 rounded-[12px]"></div>
+              <div className="space-y-4"><div className="h-8 bg-gray-100 rounded"></div><div className="h-6 bg-gray-100 rounded w-2/3"></div><div className="h-[120px] bg-gray-100 rounded-[12px]"></div></div>
+              <div className="hidden xl:block h-[400px] bg-gray-100 rounded-[12px]"></div>
             </div>
           </div>
         </div>
@@ -453,13 +453,13 @@ export default function ProductDetailsPage(){
   }
 
   if(loading && !product) return (
-    <div className="bg-[#f5f5f7] min-h-screen pb-[80px] lg:pb-0">
-      <div className="max-w-[1320px] mx-auto p-4">
-        <div className="bg-white rounded-2xl p-6 animate-pulse">
-          <div className="grid grid-cols-1 lg:grid-cols-[380px_1fr_360px] gap-6">
-            <div className="h-[380px] bg-gray-100 rounded-2xl"></div>
-            <div className="space-y-4"><div className="h-8 bg-gray-100 rounded"></div><div className="h-6 bg-gray-100 rounded w-2/3"></div><div className="h-[120px] bg-gray-100 rounded-2xl"></div></div>
-            <div className="h-[400px] bg-gray-100 rounded-2xl"></div>
+    <div className="w-full bg-[#f5f5f7] min-h-screen pb-[80px] lg:pb-0 overflow-x-hidden">
+      <div className="w-full max-w-[1188px] mx-auto px-0 md:px-4">
+        <div className="bg-white md:rounded-[12px] p-4 animate-pulse">
+          <div className="grid grid-cols-1 lg:grid-cols-[360px_1fr] xl:grid-cols-[380px_1fr_320px] gap-4">
+            <div className="h-[380px] bg-gray-100 rounded-[12px]"></div>
+            <div className="space-y-4"><div className="h-8 bg-gray-100 rounded"></div><div className="h-6 bg-gray-100 rounded w-2/3"></div><div className="h-[120px] bg-gray-100 rounded-[12px]"></div></div>
+            <div className="hidden xl:block h-[400px] bg-gray-100 rounded-[12px]"></div>
           </div>
         </div>
       </div>
@@ -474,146 +474,149 @@ export default function ProductDetailsPage(){
   const totalPrice = product.price*quantity + deliveryCharge
 
   return (
-    <div className="bg-[#f5f5f7] min-h-screen pb-[80px] lg:pb-0">
+    <div className="w-full bg-[#f5f5f7] min-h-screen pb-[80px] lg:pb-0 overflow-x-hidden">
       {flashSale && flashSale.discount>0 && (
         <div className="bg-gradient-to-r from-[#ff1a00] to-[#ff6a00] text-white relative z-20 shadow">
-          <div className="max-w-[1320px] mx-auto px-4 py-2.5 flex items-center justify-between">
-            <div className="flex items-center gap-3"><span className="font-black text-[13px] lg:text-[14px]">FLASH SALE • {flashSale.discount}% OFF - {product.title}</span></div>
-            <div className="flex items-center gap-1.5 text-[12px] font-black"><span className="bg-black px-2 py-1 rounded">{String(timeLeft.h).padStart(2,'0')}</span>:<span className="bg-black px-2 py-1 rounded">{String(timeLeft.m).padStart(2,'0')}</span>:<span className="bg-black px-2 py-1 rounded">{String(timeLeft.s).padStart(2,'0')}</span></div>
+          <div className="w-full max-w-[1188px] mx-auto px-2 md:px-4 py-2.5 flex items-center justify-between">
+            <div className="flex items-center gap-3"><span className="font-black text-[12px] md:text-[13px] truncate">FLASH SALE • {flashSale.discount}% OFF - {product.title}</span></div>
+            <div className="flex items-center gap-1 text-[11px] md:text-[12px] font-black shrink-0"><span className="bg-black px-2 py-1 rounded">{String(timeLeft.h).padStart(2,'0')}</span>:<span className="bg-black px-2 py-1 rounded">{String(timeLeft.m).padStart(2,'0')}</span>:<span className="bg-black px-2 py-1 rounded">{String(timeLeft.s).padStart(2,'0')}</span></div>
           </div>
         </div>
       )}
 
-      <div className="max-w-[1320px] mx-auto bg-white lg:rounded-2xl overflow-hidden shadow-sm mt-2">
-        <nav aria-label="Breadcrumb" className="flex px-4 lg:px-6 py-3 text-[12px] text-[#757575] gap-2 border-b bg-[#fcfcfc] items-center justify-between" suppressHydrationWarning>
-          <div className="flex gap-2 items-center flex-wrap">
-            <Link prefetch={false} href="/" className="hover:text-[#1a9cb7] hover:underline">Home</Link>
+      {/* ✅ FIXED SIZE - 1188px - Desktop Phone Same - কাটবে না */}
+      <div className="w-full max-w-[1188px] mx-auto bg-white md:rounded-[12px] overflow-hidden shadow-sm mt-0 md:mt-3 border-0 md:border">
+        <nav aria-label="Breadcrumb" className="flex px-3 md:px-5 py-3 text-[11px] md:text-[12px] text-[#757575] gap-2 border-b bg-[#fcfcfc] items-center justify-between overflow-hidden" suppressHydrationWarning>
+          <div className="flex gap-1.5 md:gap-2 items-center flex-wrap overflow-hidden">
+            <Link prefetch={false} href="/" className="hover:text-[#1a9cb7] hover:underline shrink-0">Home</Link>
             {breadcrumbData.map((cat, idx)=>(
-              <span key={idx} className="flex items-center gap-2">
+              <span key={idx} className="flex items-center gap-1.5 md:gap-2 shrink-0">
                 <span className="text-[10px]">›</span>
-                <Link prefetch={false} href={`/search?category=${encodeURIComponent(cat)}`} className="hover:text-[#1a9cb7] hover:underline capitalize">{cat}</Link>
+                <Link prefetch={false} href={`/search?category=${encodeURIComponent(cat)}`} className="hover:text-[#1a9cb7] hover:underline capitalize truncate max-w-[80px] md:max-w-none">{cat}</Link>
               </span>
             ))}
-            <span className="text-[10px]">›</span>
-            <span className="text-[#212121] font-normal truncate max-w-[300px]">{product.title}</span>
+            <span className="text-[10px] shrink-0">›</span>
+            <span className="text-[#212121] font-normal truncate max-w-[120px] md:max-w-[300px]">{product.title}</span>
           </div>
           <div className="hidden lg:flex gap-2 shrink-0"><button onClick={handleWishlist} className={`px-3 py-1 rounded-full border text-[11px] font-black ${wishlisted?'bg-red-500 text-white border-red-500':'bg-white'}`}>{wishlisted?'♥ Wishlisted':'♡ Wishlist'}</button><button onClick={handleShare} className="px-3 py-1 rounded-full border bg-white text-[11px] font-black">Share</button></div>
         </nav>
 
-        <div className="grid grid-cols-1 lg:grid-cols-[380px_1fr_360px] gap-0">
-          <div className="bg-white p-2 lg:p-5">
-            <div className="relative w-full h-[320px] lg:h-[380px] bg-white overflow-hidden lg:rounded-2xl border flex items-center justify-center" ref={mainImageRef} onMouseMove={handleMouseMove} onMouseLeave={()=>setZoomPos(p=>({...p,show:false}))}>
+        {/* ✅ FIXED GRID - Laptop এ কাটবে না - 1024px এ 2 কলাম, 1280px এ 3 কলাম */}
+        <div className="grid grid-cols-1 lg:grid-cols-[360px_1fr] xl:grid-cols-[380px_1fr_320px] gap-0">
+          <div className="bg-white p-2 md:p-4 border-b lg:border-b-0 lg:border-r">
+            <div className="relative w-full h-[300px] md:h-[380px] bg-white overflow-hidden rounded-[12px] border flex items-center justify-center" ref={mainImageRef} onMouseMove={handleMouseMove} onMouseLeave={()=>setZoomPos(p=>({...p,show:false}))}>
               {showVideo && product.video? <video src={product.video} controls autoPlay className="w-full h-full object-contain bg-black"/> : <>
-                <Image src={safeImages[activeImage]} alt={product.title} fill className="object-contain p-2 lg:p-4" unoptimized priority fetchPriority="high" sizes="(max-width:768px) 100vw, 380px" />
-                {zoomPos.show && <div className="hidden lg:block absolute inset-0 z-10 pointer-events-none" style={{ backgroundImage:`url(${safeImages[activeImage]})`, backgroundPosition:`${zoomPos.x}% ${zoomPos.y}%`, backgroundSize:'250%', backgroundRepeat:'no-repeat' }}></div>}
+                <Image src={safeImages[activeImage]} alt={product.title} fill className="object-contain p-2 md:p-4" unoptimized priority fetchPriority="high" sizes="(max-width:768px) 100vw, 380px" />
+                {zoomPos.show && <div className="hidden xl:block absolute inset-0 z-10 pointer-events-none" style={{ backgroundImage:`url(${safeImages[activeImage]})`, backgroundPosition:`${zoomPos.x}% ${zoomPos.y}%`, backgroundSize:'250%', backgroundRepeat:'no-repeat' }}></div>}
               </>}
-              {product.is_mall && <div className="absolute top-4 left-4 bg-[#7b1fa2] text-white text-[10px] font-black px-3 py-1.5 rounded-full shadow-lg">BAHARAZ MALL</div>}
-              {product.discount>0 && <div className="absolute top-4 right-4 bg-[#ff1a00] text-white text-[12px] font-black px-3 py-1 rounded-full">-{product.discount}%</div>}
-              <button onClick={handleWishlist} className="absolute bottom-4 right-4 w-10 h-10 bg-white rounded-full shadow flex items-center justify-center text-[18px] border">{wishlisted?'❤️':'🤍'}</button>
+              {product.is_mall && <div className="absolute top-3 left-3 bg-[#7b1fa2] text-white text-[10px] font-black px-2.5 py-1 rounded-full shadow">BAHARAZ MALL</div>}
+              {product.discount>0 && <div className="absolute top-3 right-3 bg-[#ff1a00] text-white text-[11px] font-black px-2.5 py-1 rounded-full">-{product.discount}%</div>}
+              <button onClick={handleWishlist} className="absolute bottom-3 right-3 w-9 h-9 bg-white rounded-full shadow flex items-center justify-center text-[16px] border"> {wishlisted?'❤️':'🤍'} </button>
             </div>
-            <div className="flex gap-3 p-3 lg:p-4 overflow-x-auto scrollbar-hide">
-              {safeImages.map((img,i)=><button key={i} onClick={()=>{setActiveImage(i); setShowVideo(false)}} className={`min-w-[64px] h-[64px] rounded-xl border-2 overflow-hidden flex-shrink-0 bg-white ${activeImage===i &&!showVideo?'border-[#ff1a00] shadow':'border-gray-200'}`}><Image src={img} alt={`${product.title} ${i+1}`} width={64} height={64} className="object-contain w-full h-full p-1" unoptimized /></button>)}
+            <div className="flex gap-2 p-2 md:p-3 overflow-x-auto scrollbar-hide">
+              {safeImages.map((img,i)=><button key={i} onClick={()=>{setActiveImage(i); setShowVideo(false)}} className={`min-w-[56px] md:min-w-[64px] h-[56px] md:h-[64px] rounded-[10px] border-2 overflow-hidden flex-shrink-0 bg-white ${activeImage===i &&!showVideo?'border-[#ff1a00] shadow':'border-gray-200'}`}><Image src={img} alt={`${product.title} ${i+1}`} width={64} height={64} className="object-contain w-full h-full p-1" unoptimized /></button>)}
             </div>
           </div>
 
-          <div className="px-4 lg:px-7 py-4 lg:py-5 border-r">
-            <h1 className="text-[16px] lg:text-[22px] font-bold lg:font-black leading-[22px] lg:leading-[28px] text-[#111] tracking-tight break-words">{product.title}</h1>
-            <p className="text-[11px] text-[#888] mt-2">SKU: {product.sku} • Brand: {product.brand} • Category: <Link prefetch={false} href={`/search?category=${encodeURIComponent(product.category)}`} className="text-[#1a9cb7] hover:underline">{product.category}</Link> • {product.stock} in Stock</p>
+          <div className="px-3 md:px-6 py-4 lg:py-5">
+            <h1 className="text-[16px] md:text-[20px] xl:text-[22px] font-bold xl:font-black leading-[20px] md:leading-[26px] text-[#111] tracking-tight break-words">{product.title}</h1>
+            <p className="text-[11px] text-[#888] mt-2 line-clamp-2">SKU: {product.sku} • Brand: {product.brand} • Category: <Link prefetch={false} href={`/search?category=${encodeURIComponent(product.category)}`} className="text-[#1a9cb7] hover:underline">{product.category}</Link> • {product.stock} in Stock</p>
             <div className="flex items-center gap-2 mt-3 flex-wrap">
-              <span className="text-[#ffb400] text-[14px]">★★★★★</span>
-              <span className="text-[13px] font-black">{avgRating}</span>
-              <span className="text-[12px] text-[#666]">({reviews.length>0? reviews.length : product.review_count||12} Ratings)</span>
-              <span className="text-[11px] bg-[#e8f5e9] text-[#2e7d32] px-2 py-0.5 rounded-full font-bold">In Stock</span>
-              {product.seller.is_verified && <span className="text-[11px] bg-[#e3f2fd] text-[#1565c0] px-2 py-0.5 rounded-full font-black">Verified Seller</span>}
-              {product.is_mall && <span className="text-[11px] bg-[#f3e5f5] text-[#7b1fa2] px-2 py-0.5 rounded-full font-black">Baharaz Mall</span>}
+              <span className="text-[#ffb400] text-[13px]">★★★★★</span>
+              <span className="text-[12px] md:text-[13px] font-black">{avgRating}</span>
+              <span className="text-[11px] md:text-[12px] text-[#666]">({reviews.length>0? reviews.length : product.review_count||12} Ratings)</span>
+              <span className="text-[10px] md:text-[11px] bg-[#e8f5e9] text-[#2e7d32] px-2 py-0.5 rounded-full font-bold">In Stock</span>
+              {product.seller.is_verified && <span className="text-[10px] md:text-[11px] bg-[#e3f2fd] text-[#1565c0] px-2 py-0.5 rounded-full font-black">Verified Seller</span>}
+              {product.is_mall && <span className="text-[10px] md:text-[11px] bg-[#f3e5f5] text-[#7b1fa2] px-2 py-0.5 rounded-full font-black">Baharaz Mall</span>}
             </div>
 
-            <div className="mt-5 bg-gradient-to-br from-[#fff8f0] to-[#fff] border-2 border-[#ffe0cc] p-4 lg:p-5 rounded-2xl">
-              <div className="flex items-baseline gap-3"><span className="text-[28px] lg:text-[32px] font-black text-[#ff1a00]">৳{product.price.toLocaleString()}</span>{product.discount>0 && <><span className="text-[14px] lg:text-[15px] text-[#999] line-through">৳{product.original_price.toLocaleString()}</span><span className="bg-[#ff1a00] text-white text-[11px] font-black px-2.5 py-1 rounded-full">-{product.discount}%</span></>}</div>
-              <div className="mt-3 pt-3 border-t border-dashed flex justify-between text-[11px] font-bold bg-[#fffaf5] p-2 rounded"><span>Product: ৳{(product.price*quantity).toLocaleString()}</span><span className="text-[#ff1a00]">+ Delivery ৳{deliveryCharge} = ৳{totalPrice.toLocaleString()}</span></div>
+            <div className="mt-4 bg-gradient-to-br from-[#fff8f0] to-[#fff] border border-[#ffe0cc] md:border-2 p-3 md:p-4 rounded-[12px]">
+              <div className="flex items-baseline gap-2 md:gap-3 flex-wrap"><span className="text-[24px] md:text-[32px] font-black text-[#ff1a00]">৳{product.price.toLocaleString()}</span>{product.discount>0 && <><span className="text-[13px] md:text-[15px] text-[#999] line-through">৳{product.original_price.toLocaleString()}</span><span className="bg-[#ff1a00] text-white text-[10px] md:text-[11px] font-black px-2 py-1 rounded-full">-{product.discount}%</span></>}</div>
+              <div className="mt-2 md:mt-3 pt-2 md:pt-3 border-t border-dashed flex justify-between text-[10px] md:text-[11px] font-bold bg-[#fffaf5] p-2 rounded"><span>Product: ৳{(product.price*quantity).toLocaleString()}</span><span className="text-[#ff1a00]">+ Delivery ৳{deliveryCharge} = ৳{totalPrice.toLocaleString()}</span></div>
             </div>
 
-            {safeColors.length>0 && <div className="mt-6"><p className="text-[13px] font-black mb-3">Color: <span className="font-bold text-[#ff1a00]">{selectedColor}</span></p><div className="flex gap-2.5 flex-wrap">{safeColors.map(c=><button key={c} onClick={()=>setSelectedColor(c)} className={`px-5 py-2.5 border-2 rounded-xl text-[12px] font-bold ${selectedColor===c?'border-[#ff1a00] bg-[#fff1eb] text-[#ff1a00]':'border-gray-200 bg-white'}`}>{c}</button>)}</div></div>}
-            {safeSizes.length>0 && <div className="mt-5"><p className="text-[13px] font-black mb-3">Size: <span className="font-bold text-[#ff1a00]">{selectedSize}</span></p><div className="flex gap-2.5 flex-wrap">{safeSizes.map(s=><button key={s} onClick={()=>setSelectedSize(s)} className={`min-w-[48px] h-[44px] border-2 rounded-xl text-[12px] font-black ${selectedSize===s?'bg-black text-white border-black':'bg-white border-gray-200'}`}>{s}</button>)}</div></div>}
+            {safeColors.length>0 && <div className="mt-5"><p className="text-[12px] md:text-[13px] font-black mb-2.5">Color: <span className="font-bold text-[#ff1a00]">{selectedColor}</span></p><div className="flex gap-2 flex-wrap">{safeColors.map(c=><button key={c} onClick={()=>setSelectedColor(c)} className={`px-4 py-2 border-2 rounded-[10px] text-[11px] md:text-[12px] font-bold ${selectedColor===c?'border-[#ff1a00] bg-[#fff1eb] text-[#ff1a00]':'border-gray-200 bg-white'}`}>{c}</button>)}</div></div>}
+            {safeSizes.length>0 && <div className="mt-4"><p className="text-[12px] md:text-[13px] font-black mb-2.5">Size: <span className="font-bold text-[#ff1a00]">{selectedSize}</span></p><div className="flex gap-2 flex-wrap">{safeSizes.map(s=><button key={s} onClick={()=>setSelectedSize(s)} className={`min-w-[44px] h-[40px] border-2 rounded-[10px] text-[11px] md:text-[12px] font-black ${selectedSize===s?'bg-black text-white border-black':'bg-white border-gray-200'}`}>{s}</button>)}</div></div>}
 
-            <div className="mt-6 flex items-center gap-4"><p className="text-[13px] font-black">Quantity:</p><div className="flex items-center border-2 rounded-xl overflow-hidden"><button onClick={()=>setQuantity(Math.max(1,quantity-1))} className="w-11 h-11 hover:bg-gray-100 font-black text-[20px]">-</button><span className="w-14 text-center font-black text-[16px]">{quantity}</span><button onClick={()=>setQuantity(Math.min(product.stock,quantity+1))} className="w-11 h-11 hover:bg-gray-100 font-black text-[20px]">+</button></div><span className="text-[11px] text-[#666] font-bold">{product.stock} available</span></div>
+            <div className="mt-5 flex items-center gap-3"><p className="text-[12px] md:text-[13px] font-black">Quantity:</p><div className="flex items-center border-2 rounded-[10px] overflow-hidden"><button onClick={()=>setQuantity(Math.max(1,quantity-1))} className="w-10 h-10 hover:bg-gray-100 font-black text-[18px]">-</button><span className="w-12 text-center font-black text-[15px]">{quantity}</span><button onClick={()=>setQuantity(Math.min(product.stock,quantity+1))} className="w-10 h-10 hover:bg-gray-100 font-black text-[18px]">+</button></div><span className="text-[11px] text-[#666] font-bold">{product.stock} available</span></div>
 
-            <div className="hidden lg:flex gap-3 mt-7">
-              <button onClick={handleAddToCart} className="flex-1 h-[52px] bg-[#fff1e6] text-[#ff1a00] border-2 border-[#ff1a00] font-black rounded-xl hover:bg-[#ffe1cc] text-[15px]">Add to Cart</button>
-              <button onClick={handleBuyNowDirect} className="flex-1 h-[52px] bg-gradient-to-r from-[#ff1a00] to-[#ff6a00] text-white font-black rounded-xl shadow-xl text-[15px] hover:scale-[1.02] transition">Buy Now</button>
+            <div className="hidden lg:flex gap-3 mt-6">
+              <button onClick={handleAddToCart} className="flex-1 h-[48px] bg-[#fff1e6] text-[#ff1a00] border-2 border-[#ff1a00] font-black rounded-[12px] hover:bg-[#ffe1cc] text-[14px]">Add to Cart</button>
+              <button onClick={handleBuyNowDirect} className="flex-1 h-[48px] bg-gradient-to-r from-[#ff1a00] to-[#ff6a00] text-white font-black rounded-[12px] shadow text-[14px] hover:scale-[1.02] transition">Buy Now</button>
             </div>
 
-            <div className="mt-8">
-              <h2 className="font-black text-[15px] border-b pb-3">Product Details of {product.title}</h2>
-              <p className="text-[13px] leading-7 mt-4 whitespace-pre-wrap text-[#222]">{product.description || 'This product is 100% authentic from Baharaz.'}</p>
-              <div className="mt-6 bg-[#fafafa] rounded-xl p-4 border">
-                <h3 className="font-black text-[12px] mb-3">Specifications</h3>
-                <div className="grid grid-cols-2 gap-3 text-[12px]">
+            <div className="mt-6">
+              <h2 className="font-black text-[14px] md:text-[15px] border-b pb-2.5">Product Details of {product.title}</h2>
+              <p className="text-[12px] md:text-[13px] leading-6 md:leading-7 mt-3 whitespace-pre-wrap text-[#222]">{product.description || 'This product is 100% authentic from Baharaz.'}</p>
+              <div className="mt-5 bg-[#fafafa] rounded-[12px] p-3 md:p-4 border">
+                <h3 className="font-black text-[11px] md:text-[12px] mb-2.5">Specifications</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 text-[11px] md:text-[12px]">
                   <div className="flex justify-between border-b pb-2"><span className="text-[#666]">Material</span><span className="font-bold">{product.material}</span></div>
-                  <div className="flex justify-between border-b pb-2"><span className="text-[#666]">Category</span><span className="font-bold">{product.category}</span></div>
+                  <div className="flex justify-between border-b pb-2"><span className="text-[#666]">Category</span><span className="font-bold truncate ml-2">{product.category}</span></div>
                   <div className="flex justify-between border-b pb-2"><span className="text-[#666]">Brand</span><span className="font-bold">{product.brand}</span></div>
                   <div className="flex justify-between border-b pb-2"><span className="text-[#666]">Stock</span><span className="font-bold text-green-600">{product.stock} In Stock</span></div>
-                  <div className="flex justify-between border-b pb-2"><span className="text-[#666]">Seller</span><span className="font-bold">{product.seller.name}</span></div>
-                  <div className="flex justify-between border-b pb-2"><span className="text-[#666]">Delivery</span><span className="font-bold">All Over Bangladesh - Unlimited</span></div>
+                  <div className="flex justify-between border-b pb-2"><span className="text-[#666]">Seller</span><span className="font-bold truncate ml-2">{product.seller.name}</span></div>
+                  <div className="flex justify-between border-b pb-2"><span className="text-[#666]">Delivery</span><span className="font-bold">All Bangladesh</span></div>
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="bg-[#f9fafb] p-3 space-y-3">
-            <div className="bg-white rounded-2xl border shadow-sm p-5">
+          {/* ✅ RIGHT SIDEBAR - Laptop এ কাটবে না - xl এ দেখাবে, lg তে নিচে */}
+          <div className="bg-[#f9fafb] lg:bg-[#f9fafb] xl:bg-[#f9fafb] p-3 space-y-3 border-t lg:border-t-0 xl:border-l">
+            <div className="bg-white rounded-[12px] border shadow-sm p-4">
               <h3 className="text-[11px] font-black tracking-widest text-[#111]">DELIVERY OPTIONS</h3>
-              <div className="mt-5 space-y-4">
-                <div className="flex gap-3"><div className="w-10 h-10 bg-[#e3f2fd] rounded-full flex items-center justify-center flex-shrink-0">📍</div><div className="flex-1"><label className="text-[11px] font-bold text-[#666]">Delivery Location - Instant</label><div className="mt-1"><select value={deliveryLocation} onChange={e=>{ setDeliveryLocation(e.target.value); localStorage.setItem('baharaz_delivery_location', e.target.value)}} className="w-full font-black text-[13px] bg-[#f5f7ff] border-2 border-gray-200 rounded-xl px-3 py-2.5 outline-none focus:border-black"><option value={deliveryLocation}>{deliveryLocation} - ৳{deliveryCharge}</option>{Object.keys(DELIVERY_CHARGES).filter(c=>c!==deliveryLocation).map(loc=><option key={loc} value={loc}>{loc} - ৳{DELIVERY_CHARGES[loc]}</option>)}</select></div><div className="mt-3 bg-[#f0f7ff] border-2 border-[#1a9cb7]/20 p-3 rounded-xl"><p className="text-[12px] font-black text-[#111]">Standard Delivery • ৳{deliveryCharge} • Zero Second</p><p className="text-[11px] text-[#333] mt-1" suppressHydrationWarning>Guaranteed by {guaranteedDate || '2 days'}</p><p className="text-[11px] text-[#0a8a00] font-black mt-2">Cash on Delivery Available</p></div></div></div>
-                <div className="pt-4 border-t flex gap-3"><div className="w-10 h-10 bg-[#fff3e0] rounded-full flex items-center justify-center flex-shrink-0">↩️</div><div><p className="text-[12px] font-black">Return & Warranty - 14 Days Free Return</p><p className="text-[11px] text-[#555] mt-1 leading-7">14 Days Free Return - 100% Authentic</p></div></div>
+              <div className="mt-4 space-y-4">
+                <div className="flex gap-2.5"><div className="w-9 h-9 bg-[#e3f2fd] rounded-full flex items-center justify-center flex-shrink-0 text-[14px]">📍</div><div className="flex-1 min-w-0"><label className="text-[11px] font-bold text-[#666]">Delivery Location - Instant</label><div className="mt-1.5"><select value={deliveryLocation} onChange={e=>{ setDeliveryLocation(e.target.value); localStorage.setItem('baharaz_delivery_location', e.target.value)}} className="w-full font-black text-[12px] bg-[#f5f7ff] border-2 border-gray-200 rounded-[10px] px-2.5 py-2.5 outline-none focus:border-black truncate"><option value={deliveryLocation}>{deliveryLocation} - ৳{deliveryCharge}</option>{Object.keys(DELIVERY_CHARGES).filter(c=>c!==deliveryLocation).map(loc=><option key={loc} value={loc}>{loc} - ৳{DELIVERY_CHARGES[loc]}</option>)}</select></div><div className="mt-3 bg-[#f0f7ff] border border-[#1a9cb7]/20 p-2.5 rounded-[10px]"><p className="text-[11px] font-black text-[#111]">Standard Delivery • ৳{deliveryCharge} • Zero Second</p><p className="text-[11px] text-[#333] mt-1" suppressHydrationWarning>Guaranteed by {guaranteedDate || '2 days'}</p><p className="text-[11px] text-[#0a8a00] font-black mt-1.5">Cash on Delivery Available</p></div></div></div>
+                <div className="pt-3 border-t flex gap-2.5"><div className="w-9 h-9 bg-[#fff3e0] rounded-full flex items-center justify-center flex-shrink-0 text-[14px]">↩️</div><div><p className="text-[11px] font-black">Return & Warranty - 14 Days Free Return</p><p className="text-[11px] text-[#555] mt-1 leading-5">14 Days Free Return - 100% Authentic</p></div></div>
               </div>
             </div>
 
-            <div className="bg-white rounded-2xl border shadow-sm p-5">
+            <div className="bg-white rounded-[12px] border shadow-sm p-4">
               <div className="flex justify-between items-center"><h3 className="text-[11px] font-black tracking-widest">SOLD BY</h3>{product.seller.slug && <Link prefetch={false} href={`/store/${product.seller.slug}`} className="text-[11px] text-[#1a9cb7] font-black hover:underline">Visit Store →</Link>}</div>
-              <div className="flex gap-3 mt-5 items-center">
-                <div className="w-[56px] h-[56px] rounded-2xl bg-white border-2 border-gray-100 flex items-center justify-center overflow-hidden shadow flex-shrink-0">
+              <div className="flex gap-3 mt-4 items-center">
+                <div className="w-[48px] h-[48px] rounded-[12px] bg-white border-2 border-gray-100 flex items-center justify-center overflow-hidden shadow flex-shrink-0">
                   {product.seller.logo? (
                     <img src={product.seller.logo} alt={`${product.seller.name} Logo`} className="w-full h-full object-cover" />
                   ) : (
-                    <div className="w-full h-full bg-gradient-to-br from-[#ff6a00] to-[#ff1a00] flex items-center justify-center text-white font-black text-[22px]">{product.seller.name?.charAt(0)?.toUpperCase() || 'B'}</div>
+                    <div className="w-full h-full bg-gradient-to-br from-[#ff6a00] to-[#ff1a00] flex items-center justify-center text-white font-black text-[20px]">{product.seller.name?.charAt(0)?.toUpperCase() || 'B'}</div>
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-[14px] font-black flex items-center gap-1.5 leading-tight truncate">{product.seller.name} {product.seller.is_verified && <span className="bg-[#1a9cb7] text-white text-[9px] px-1.5 py-0.5 rounded-full font-black">✓ Verified</span>}</p>
+                  <p className="text-[13px] font-black flex items-center gap-1 leading-tight truncate">{product.seller.name} {product.seller.is_verified && <span className="bg-[#1a9cb7] text-white text-[8px] px-1 py-0.5 rounded-full font-black">✓</span>}</p>
                   <p className="text-[11px] text-[#666] font-bold mt-0.5 truncate">{product.seller.district} • Since {product.seller.joined}</p>
                 </div>
               </div>
-              <div className="grid grid-cols-3 gap-2 mt-5 bg-[#fafafa] p-3 rounded-xl text-center border"><div><p className="font-black text-[13px]">4.9★</p><p className="text-[9px] text-[#666] font-bold">Rating</p></div><div className="border-x"><p className="font-black text-[13px]">98%</p><p className="text-[9px] text-[#666] font-bold">Ship on Time</p></div><div><p className="font-black text-[13px]">100%</p><p className="text-[9px] text-[#666] font-bold">Authentic</p></div></div>
-              <div className="flex gap-2.5 mt-5">
-                <button onClick={handleChat} className="flex-1 h-[42px] border-2 border-[#1a9cb7] text-[#1a9cb7] font-black rounded-xl text-[11px] hover:bg-[#e3f2fd]">Chat</button>
-                <Link prefetch={false} href={product.seller.slug? `/store/${product.seller.slug}` : `/store/${product.seller.id || ''}`} className="flex-1 h-[42px] bg-black text-white font-black rounded-xl text-[11px] flex items-center justify-center hover:bg-gray-800">View Shop</Link>
+              <div className="grid grid-cols-3 gap-2 mt-4 bg-[#fafafa] p-2.5 rounded-[10px] text-center border"><div><p className="font-black text-[12px]">4.9★</p><p className="text-[9px] text-[#666] font-bold">Rating</p></div><div className="border-x"><p className="font-black text-[12px]">98%</p><p className="text-[9px] text-[#666] font-bold">Ship on Time</p></div><div><p className="font-black text-[12px]">100%</p><p className="text-[9px] text-[#666] font-bold">Authentic</p></div></div>
+              <div className="flex gap-2 mt-4">
+                <button onClick={handleChat} className="flex-1 h-[40px] border-2 border-[#1a9cb7] text-[#1a9cb7] font-black rounded-[10px] text-[11px] hover:bg-[#e3f2fd]">Chat</button>
+                <Link prefetch={false} href={product.seller.slug? `/store/${product.seller.slug}` : `/store/${product.seller.id || ''}`} className="flex-1 h-[40px] bg-black text-white font-black rounded-[10px] text-[11px] flex items-center justify-center hover:bg-gray-800">View Shop</Link>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="bg-white border-t p-6">
-          <h2 className="font-black text-[16px] flex items-center gap-2">Ratings & Reviews of {product.title} <span className="text-[12px] font-normal text-[#666]">({reviews.length || 0})</span> <span className="bg-[#fff8e1] px-2.5 py-1 rounded-full text-[12px]">{avgRating} ★</span></h2>
-          {reviews.length===0? <div className="text-center py-12 bg-[#fafafa] rounded-2xl mt-4 border-2 border-dashed"><p className="text-[14px] font-bold">No reviews yet - Be First!</p><p className="text-[12px] text-[#666] mt-2">Be the first to review this product</p></div> : <div className="mt-6 space-y-4">{reviews.map((r,i)=><div key={i} className="border-b pb-4"><div className="flex gap-2 items-center"><span className="text-[#ffb400] text-[13px]">{'★'.repeat(Number(r.rating)||5)}</span><span className="text-[11px] bg-[#e8f5e9] text-[#2e7d32] px-2.5 py-0.5 rounded-full font-bold">Verified Purchase</span></div><p className="text-[13px] mt-2 leading-7 text-[#222]">{r.comment||r.review_text||'Excellent product!'}</p></div>)}</div>}
+        <div className="bg-white border-t p-4 md:p-5">
+          <h2 className="font-black text-[14px] md:text-[16px] flex items-center gap-2 flex-wrap">Ratings & Reviews of {product.title} <span className="text-[11px] md:text-[12px] font-normal text-[#666]">({reviews.length || 0})</span> <span className="bg-[#fff8e1] px-2 py-1 rounded-full text-[11px] md:text-[12px]">{avgRating} ★</span></h2>
+          {reviews.length===0? <div className="text-center py-10 bg-[#fafafa] rounded-[12px] mt-4 border-2 border-dashed"><p className="text-[13px] font-bold">No reviews yet - Be First!</p><p className="text-[11px] text-[#666] mt-1">Be the first to review this product</p></div> : <div className="mt-4 space-y-3">{reviews.map((r,i)=><div key={i} className="border-b pb-3"><div className="flex gap-2 items-center"><span className="text-[#ffb400] text-[12px]">{'★'.repeat(Number(r.rating)||5)}</span><span className="text-[10px] bg-[#e8f5e9] text-[#2e7d32] px-2 py-0.5 rounded-full font-bold">Verified Purchase</span></div><p className="text-[12px] md:text-[13px] mt-2 leading-6 text-[#222]">{r.comment||r.review_text||'Excellent product!'}</p></div>)}</div>}
         </div>
 
         {sameStoreProducts.length>0 && (
-          <div className="bg-[#f9fafb] border-t p-6">
+          <div className="bg-[#f9fafb] border-t p-4 md:p-5">
             <div className="flex justify-between items-center">
-              <h2 className="font-black text-[18px]">From Same Store - Unlimited</h2>
-              <Link prefetch={false} href={product.seller.slug? `/store/${product.seller.slug}` : `/search?seller=${product.seller.id}`} className="hidden lg:flex text-[12px] font-black text-white bg-black px-4 py-2 rounded-full hover:bg-gray-800">View Store →</Link>
+              <h2 className="font-black text-[14px] md:text-[16px]">From Same Store - Unlimited</h2>
+              <Link prefetch={false} href={product.seller.slug? `/store/${product.seller.slug}` : `/search?seller=${product.seller.id}`} className="hidden md:flex text-[11px] font-black text-white bg-black px-3 py-1.5 rounded-full hover:bg-gray-800">View Store →</Link>
             </div>
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 mt-5">
+            <div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-6 gap-3 mt-4">
               {sameStoreProducts.map(p=>(
-                <Link prefetch={false} key={`store-${p.id}`} href={`/product/${p.slug||p.id}`} className="bg-white border-2 rounded-2xl overflow-hidden hover:shadow-xl hover:border-black transition group" onClick={()=>{try{sessionStorage.setItem('baharaz_last_list', JSON.stringify(sameStoreProducts))}catch{}}}>
+                <Link prefetch={false} key={`store-${p.id}`} href={`/product/${p.slug||p.id}`} className="bg-white border rounded-[12px] overflow-hidden hover:shadow-lg hover:border-black transition group" onClick={()=>{try{sessionStorage.setItem('baharaz_last_list', JSON.stringify(sameStoreProducts))}catch{}}}>
                   <div className="aspect-square bg-white overflow-hidden relative">
-                    <img src={getImageUrl(p,0)} alt={p.name || p.title} className="w-full h-full object-contain p-2 group-hover:scale-110 transition duration-500" loading="lazy"/>
-                    {p.discount_price && <span className="absolute top-2 right-2 bg-[#ff1a00] text-white text-[10px] font-black px-2 py-1 rounded-full">-{Math.round(((p.price - p.discount_price)/p.price)*100)}%</span>}
+                    <img src={getImageUrl(p,0)} alt={p.name || p.title} className="w-full h-full object-contain p-2 group-hover:scale-105 transition duration-300" loading="lazy"/>
+                    {p.discount_price && <span className="absolute top-2 right-2 bg-[#ff1a00] text-white text-[9px] font-black px-1.5 py-0.5 rounded-full">-{Math.round(((p.price - p.discount_price)/p.price)*100)}%</span>}
                   </div>
-                  <div className="p-3">
-                    <p className="text-[11px] line-clamp-2 h-[34px] font-medium leading-4">{p.name || p.title}</p>
-                    <p className="text-[14px] font-black text-[#ff1a00] mt-2">৳{Number(p.discount_price||p.price).toLocaleString()}</p>
+                  <div className="p-2.5">
+                    <p className="text-[11px] line-clamp-2 h-[32px] font-medium leading-4">{p.name || p.title}</p>
+                    <p className="text-[13px] font-black text-[#ff1a00] mt-1.5">৳{Number(p.discount_price||p.price).toLocaleString()}</p>
                   </div>
                 </Link>
               ))}
@@ -622,17 +625,17 @@ export default function ProductDetailsPage(){
         )}
 
         {qualityProducts.length>0 && (
-          <div className="bg-white border-t p-6">
-            <h2 className="font-black text-[18px]">Similar Products - Unlimited Collection</h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 mt-5">
+          <div className="bg-white border-t p-4 md:p-5">
+            <h2 className="font-black text-[14px] md:text-[16px]">Similar Products - Unlimited Collection</h2>
+            <div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-6 gap-3 mt-4">
               {qualityProducts.map(p=>(
-                <Link prefetch={false} key={`similar-${p.id}`} href={`/product/${p.slug||p.id}`} className="bg-white border-2 rounded-2xl overflow-hidden hover:shadow-xl transition group" onClick={()=>{try{sessionStorage.setItem('baharaz_last_list', JSON.stringify(qualityProducts))}catch{}}}>
+                <Link prefetch={false} key={`similar-${p.id}`} href={`/product/${p.slug||p.id}`} className="bg-white border rounded-[12px] overflow-hidden hover:shadow-lg transition group" onClick={()=>{try{sessionStorage.setItem('baharaz_last_list', JSON.stringify(qualityProducts))}catch{}}}>
                   <div className="aspect-square bg-white overflow-hidden relative">
-                    <img src={getImageUrl(p,0)} alt={p.name || p.title} className="w-full h-full object-contain p-2 group-hover:scale-110 transition duration-500" loading="lazy"/>
+                    <img src={getImageUrl(p,0)} alt={p.name || p.title} className="w-full h-full object-contain p-2 group-hover:scale-105 transition duration-300" loading="lazy"/>
                   </div>
-                  <div className="p-3">
-                    <p className="text-[11px] line-clamp-2 h-[34px]">{p.name || p.title}</p>
-                    <p className="text-[14px] font-black mt-2">৳{Number(p.discount_price||p.price).toLocaleString()}</p>
+                  <div className="p-2.5">
+                    <p className="text-[11px] line-clamp-2 h-[32px]">{p.name || p.title}</p>
+                    <p className="text-[13px] font-black mt-1.5">৳{Number(p.discount_price||p.price).toLocaleString()}</p>
                   </div>
                 </Link>
               ))}
@@ -641,18 +644,18 @@ export default function ProductDetailsPage(){
         )}
 
         {trendingProducts.length>0 && (
-          <div className="bg-[#f9fafb] border-t p-6">
-            <h2 className="font-black text-[18px]">Customers Also Viewed - Trending</h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 mt-5">
+          <div className="bg-[#f9fafb] border-t p-4 md:p-5">
+            <h2 className="font-black text-[14px] md:text-[16px]">Customers Also Viewed - Trending</h2>
+            <div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-6 gap-3 mt-4">
               {trendingProducts.slice(0,6).map(p=>(
-                <Link prefetch={false} key={`trend-${p.id}`} href={`/product/${p.slug||p.id}`} className="bg-white border-2 rounded-2xl overflow-hidden hover:shadow-xl transition group" onClick={()=>{try{sessionStorage.setItem('baharaz_last_list', JSON.stringify(trendingProducts))}catch{}}}>
+                <Link prefetch={false} key={`trend-${p.id}`} href={`/product/${p.slug||p.id}`} className="bg-white border rounded-[12px] overflow-hidden hover:shadow-lg transition group" onClick={()=>{try{sessionStorage.setItem('baharaz_last_list', JSON.stringify(trendingProducts))}catch{}}}>
                   <div className="aspect-square bg-white overflow-hidden relative">
                     <img src={getImageUrl(p,0)} alt={p.name || p.title} className="w-full h-full object-contain p-2" loading="lazy"/>
-                    <span className="absolute top-2 left-2 bg-black text-white text-[9px] font-black px-2 py-1 rounded-full">TRENDING</span>
+                    <span className="absolute top-2 left-2 bg-black text-white text-[8px] font-black px-1.5 py-0.5 rounded-full">TRENDING</span>
                   </div>
-                  <div className="p-3">
-                    <p className="text-[11px] line-clamp-2 h-[34px]">{p.name || p.title}</p>
-                    <p className="text-[14px] font-black text-[#ff1a00] mt-2">৳{Number(p.discount_price||p.price).toLocaleString()}</p>
+                  <div className="p-2.5">
+                    <p className="text-[11px] line-clamp-2 h-[32px]">{p.name || p.title}</p>
+                    <p className="text-[13px] font-black text-[#ff1a00] mt-1.5">৳{Number(p.discount_price||p.price).toLocaleString()}</p>
                   </div>
                 </Link>
               ))}
@@ -661,9 +664,9 @@ export default function ProductDetailsPage(){
         )}
       </div>
 
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t-2 flex h-[64px] z-50 shadow-[0_-8px_30px_rgba(0,0,0,0.12)]">
-        <button onClick={handleAddToCart} className="flex-1 bg-[#fff1e6] text-[#ff1a00] font-black text-[14px] border-r-2 border-[#ffe0cc]">Add to Cart</button>
-        <button onClick={handleBuyNowDirect} className="flex-[1.6] bg-gradient-to-r from-[#ff1a00] to-[#ff6a00] text-white font-black text-[14px]" suppressHydrationWarning>Buy Now • ৳{totalPrice.toLocaleString()}</button>
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t-2 flex h-[60px] z-50 shadow-[0_-8px_30px_rgba(0,0,0,0.12)]">
+        <button onClick={handleAddToCart} className="flex-1 bg-[#fff1e6] text-[#ff1a00] font-black text-[13px] border-r-2 border-[#ffe0cc]">Add to Cart</button>
+        <button onClick={handleBuyNowDirect} className="flex-[1.5] bg-gradient-to-r from-[#ff1a00] to-[#ff6a00] text-white font-black text-[13px]" suppressHydrationWarning>Buy Now • ৳{totalPrice.toLocaleString()}</button>
       </div>
     </div>
   )

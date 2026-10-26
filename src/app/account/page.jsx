@@ -21,99 +21,76 @@ export default function AccountDashboard() {
   const [cartCount, setCartCount] = useState(0);
   const [imgError, setImgError] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [mounted, setMounted] = useState(false);
-  const supabase = createClient();
+  const [coins, setCoins] = useState(350);
+  const [vouchers, setVouchers] = useState(2);
+  const supabase = useMemo(() => createClient(), []);
 
   useEffect(() => {
     let isMounted = true;
     let profileChannel = null;
 
-    async function load() {
-      if (!isMounted) return;
-
+    try {
+      const localCoins = Number(localStorage.getItem('baharaz_coins') || '350');
+      const localCart = JSON.parse(localStorage.getItem("baharaz_cart") || "[]");
+      const localWishlist = JSON.parse(localStorage.getItem("baharaz_wishlist") || "[]");
+      const localRecent = JSON.parse(localStorage.getItem("baharaz_recent") || localStorage.getItem("recently_viewed") || "[]");
+      const localVouchers = JSON.parse(localStorage.getItem("baharaz_vouchers") || "[]");
+      if (isMounted) {
+        setCoins(localCoins);
+        setCartCount(localCart.length);
+        if (localWishlist.length > 0) setWishlist(localWishlist);
+        if (localRecent.length > 0) setRecent(localRecent);
+        setVouchers(localVouchers.length || 2);
+      }
+      let merged = [];
       try {
-        // ✅ STEP 1 - REAL DB Session First (No localStorage before)
-        const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
-        const currentUser = sessionData?.session?.user;
-
-        if (sessionError) {
-          console.log("Session error:", sessionError);
-        }
-
-        if (!currentUser) {
-          // ✅ No User = Show Login After Loading
-          if (isMounted) {
-            // Load local orders for guest
-            let merged = [];
-            try {
-              const keys = ["baharaz_orders", "eraj_all_orders", "eraj_orders", "all_orders"];
-              keys.forEach(k => {
-                const raw = localStorage.getItem(k);
-                if (raw) {
-                  const arr = JSON.parse(raw);
-                  if (Array.isArray(arr)) {
-                    arr.forEach(o => {
-                      if (o.id || o.orderId) {
-                        merged.push({
-                          id: o.orderId || o.id,
-                          total: o.total || o.total_amount || 0,
-                          total_amount: o.total || o.total_amount || 0,
-                          status: o.status || "pending",
-                          created_at: o.date || o.created_at || new Date().toISOString(),
-                          items: o.items || []
-                        });
-                      }
-                    });
-                  }
+        const keys = ["baharaz_orders", "eraj_all_orders", "eraj_orders", "all_orders"];
+        keys.forEach(k => {
+          const raw = localStorage.getItem(k);
+          if (raw) {
+            const arr = JSON.parse(raw);
+            if (Array.isArray(arr)) {
+              arr.forEach(o => {
+                if (o.id || o.orderId) {
+                  merged.push({
+                    id: o.orderId || o.id,
+                    total: o.total || o.total_amount || 0,
+                    total_amount: o.total || o.total_amount || 0,
+                    status: o.status || "pending",
+                    created_at: o.date || o.created_at || new Date().toISOString(),
+                    items: o.items || []
+                  });
                 }
               });
-            } catch {}
-
-            const seen = new Set();
-            const unique = [];
-            merged.forEach(o => { if (!seen.has(o.id)) { seen.add(o.id); unique.push(o); } });
-            unique.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-            setOrders(unique);
-            
-            // Load local wishlist/recent for guest
-            try {
-              const localWishlist = JSON.parse(localStorage.getItem("baharaz_wishlist") || "[]");
-              const localRecent = JSON.parse(localStorage.getItem("baharaz_recent") || localStorage.getItem("recently_viewed") || "[]");
-              const localCart = JSON.parse(localStorage.getItem("baharaz_cart") || "[]");
-              if (localWishlist.length > 0) setWishlist(localWishlist);
-              if (localRecent.length > 0) setRecent(localRecent);
-              if (localCart.length > 0) setCartCount(localCart.length);
-            } catch {}
-            
-            setLoading(false);
-            setMounted(true);
+            }
           }
+        });
+      } catch {}
+      const seen = new Set();
+      const unique = [];
+      merged.forEach(o => { if (!seen.has(o.id)) { seen.add(o.id); unique.push(o); } });
+      unique.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+      if (isMounted && unique.length > 0) setOrders(unique);
+    } catch {}
+
+    async function load() {
+      if (!isMounted) return;
+      try {
+        const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+        const currentUser = sessionData?.session?.user;
+        if (sessionError) console.log("Session error:", sessionError);
+        if (!currentUser) {
+          if (isMounted) setLoading(false);
           return;
         }
-
-        // ✅ User Found
         if (isMounted) setUser(currentUser);
 
-        // ✅ Load local data after auth (for better UX)
-        try {
-          const localWishlist = JSON.parse(localStorage.getItem("baharaz_wishlist") || "[]");
-          const localRecent = JSON.parse(localStorage.getItem("baharaz_recent") || localStorage.getItem("recently_viewed") || "[]");
-          const localCart = JSON.parse(localStorage.getItem("baharaz_cart") || "[]");
-          if (isMounted) {
-            if (localWishlist.length > 0) setWishlist(localWishlist);
-            if (localRecent.length > 0) setRecent(localRecent);
-            if (localCart.length > 0) setCartCount(localCart.length);
-          }
-        } catch {}
-
-        // ✅ REAL DB - Load Profile
         const { data: prof } = await supabase.from("profiles").select("*").eq("id", currentUser.id).maybeSingle();
         if (isMounted && prof) {
           setProfile(prof);
           setImgError(false);
         }
 
-        // ✅ REALTIME - Profile Change
         profileChannel = supabase
           .channel(`profile-dashboard-${currentUser.id}`)
           .on('postgres_changes', { 
@@ -129,7 +106,6 @@ export default function AccountDashboard() {
           })
           .subscribe();
 
-        // ✅ REAL DB - Orders
         supabase.from("orders").select("*").eq("user_id", currentUser.id).order("created_at", { ascending: false }).limit(20).then(({ data: orderData }) => {
           if (!isMounted) return;
           if (orderData && orderData.length > 0) {
@@ -154,10 +130,7 @@ export default function AccountDashboard() {
       } catch (e) {
         console.log("Load error", e);
       } finally {
-        if (isMounted) {
-          setLoading(false);
-          setMounted(true);
-        }
+        if (isMounted) setLoading(false);
       }
     }
 
@@ -181,15 +154,20 @@ export default function AccountDashboard() {
     const onStorage = () => {
       try {
         const cart = JSON.parse(localStorage.getItem("baharaz_cart") || "[]");
-        if (isMounted) setCartCount(cart.length);
-        if (isMounted) setWishlist(JSON.parse(localStorage.getItem("baharaz_wishlist") || "[]"));
-        if (isMounted) setRecent(JSON.parse(localStorage.getItem("baharaz_recent") || "[]"));
+        const coinsNow = Number(localStorage.getItem('baharaz_coins') || '350');
+        if (isMounted) {
+          setCartCount(cart.length);
+          setCoins(coinsNow);
+          setWishlist(JSON.parse(localStorage.getItem("baharaz_wishlist") || "[]"));
+          setRecent(JSON.parse(localStorage.getItem("baharaz_recent") || "[]"));
+        }
       } catch {}
     };
 
     window.addEventListener("storage", onStorage);
     window.addEventListener("cartUpdated", onStorage);
     window.addEventListener("cart-update", onStorage);
+    window.addEventListener("coinsUpdated", onStorage);
     window.addEventListener("profileUpdated", onProfileUpdated);
     window.addEventListener("authChanged", onProfileUpdated);
 
@@ -210,12 +188,13 @@ export default function AccountDashboard() {
       window.removeEventListener("storage", onStorage);
       window.removeEventListener("cartUpdated", onStorage);
       window.removeEventListener("cart-update", onStorage);
+      window.removeEventListener("coinsUpdated", onStorage);
       window.removeEventListener("profileUpdated", onProfileUpdated);
       window.removeEventListener("authChanged", onProfileUpdated);
       if (profileChannel) supabase.removeChannel(profileChannel);
       authListener?.subscription?.unsubscribe();
     };
-  }, []);
+  }, [supabase]);
 
   const stats = useMemo(() => {
     const totalSpent = orders.reduce((s, o) => s + (Number(o.total) || Number(o.total_amount) || 0), 0);
@@ -239,8 +218,7 @@ export default function AccountDashboard() {
     return null;
   };
 
-  // ✅ FIX - No Flash Logic
-  if (!mounted || loading) {
+  if (loading) {
     return (
       <div className="daraz-mobile-root" style={{ width: "100%", background: "#f5f5f5", minHeight: "100vh", padding: "16px" }}>
         <div style={{ background: "white", borderRadius: "16px", padding: "16px", display: "flex", gap: "12px", alignItems: "center", marginBottom: "12px" }}>
@@ -272,9 +250,42 @@ export default function AccountDashboard() {
               </div>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <h2 style={{ margin: 0, fontSize: "20px", fontWeight: "900", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{displayName}</h2>
-                <p style={{ margin: "3px 0 0 0", fontSize: "12px", color: "#555" }}><b>{stats.wishlistCount}</b> Wishlist · <b>{cartCount}</b> Cart · <b>2</b> Vouchers</p>
+                <p style={{ margin: "3px 0 0 0", fontSize: "12px", color: "#555" }}><b>{stats.wishlistCount}</b> Wishlist · <b>{cartCount}</b> Cart · <b>{vouchers}</b> Vouchers · 🪙 <b>{coins}</b></p>
               </div>
-              <Link href="/account/profile" style={{ width: "36px", height: "36px", borderRadius: "50%", background: "white", display: "flex", alignItems: "center", justifyContent: "center", textDecoration: "none", boxShadow: "0 1px 4px rgba(0,0,0,0.1)" }}>⚙️</Link>
+              {/* ✅ FIXED: Beautiful iPhone Style Sidebar Icon - Fast 1 Click Open */}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                  window.dispatchEvent(new Event('toggleAccountSidebar'));
+                }}
+                style={{
+                  width: "40px",
+                  height: "40px",
+                  borderRadius: "12px",
+                  background: "rgba(255,255,255,0.92)",
+                  backdropFilter: "blur(12px)",
+                  WebkitBackdropFilter: "blur(12px)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  border: "1px solid rgba(0,0,0,0.06)",
+                  boxShadow: "0 2px 10px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.06)",
+                  cursor: "pointer",
+                  touchAction: "manipulation",
+                  flexShrink: 0,
+                  transition: "all 0.2s cubic-bezier(0.32,0.72,0,1)",
+                }}
+                onTouchStart={(e) => { e.currentTarget.style.transform = "scale(0.92)"; }}
+                onTouchEnd={(e) => { e.currentTarget.style.transform = "scale(1)"; }}
+                aria-label="Open Menu"
+              >
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1d1d1f" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="4" y1="6" x2="20" y2="6" />
+                  <line x1="4" y1="12" x2="20" y2="12" />
+                  <line x1="4" y1="18" x2="20" y2="18" />
+                </svg>
+              </button>
             </div>
           ) : (
             <div style={{ textAlign: "center", padding: "8px 0" }}>
@@ -288,7 +299,7 @@ export default function AccountDashboard() {
         </div>
 
         <div style={{ background: "white", padding: "10px", display: "flex", gap: "8px" }}>
-          <Link href="/coins" style={{ flex: 1, background: "#eef3ff", borderRadius: "10px", padding: "8px", display: "flex", gap: "8px", alignItems: "center", textDecoration: "none", border: "1px solid #dbe8ff" }}>
+          <Link href="/account/coins" style={{ flex: 1, background: "#eef3ff", borderRadius: "10px", padding: "8px", display: "flex", gap: "8px", alignItems: "center", textDecoration: "none", border: "1px solid #dbe8ff" }}>
             <div style={{ width: "52px", height: "52px", background: "#0a3cff", borderRadius: "8px", display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontWeight: "900", fontSize: "10px", textAlign: "center", lineHeight: "1.1" }}>UP TO<br/>70%<br/>OFF</div>
             <div><p style={{ margin: 0, fontSize: "13px", fontWeight: "900", color: "#111" }}>Baharaz Coins ❯</p><p style={{ margin: 0, fontSize: "12px", color: "#e60012", fontWeight: "900" }}>70% OFF</p><span style={{ background: "#f85606", color: "white", fontSize: "9px", padding: "2px 8px", borderRadius: "4px", fontWeight: "800" }}>SHOP HERE</span></div>
           </Link>
@@ -304,7 +315,7 @@ export default function AccountDashboard() {
             { i: "🍬", t: "Baharaz\nCandy", c: "#ffe082", link: "/baharaz-candy" },
             { i: "💰", t: "Buy More\nSave More", c: "#ffcc80", link: "/buy-more" },
             { i: "🎫", t: "Vouchers", c: "#e1bee7", link: "/account/vouchers" },
-            { i: "✨", t: "New Arriv...", c: "#fff9c4", link: "/new-arrival" },
+            { i: "🪙", t: "Coins", c: "#FFF8E1", link: "/account/coins" },
             { i: "🏬", t: "Baharaz\nMall", c: "#c8e6c9", link: "/mall" },
           ].map((x, idx) => (
             <Link key={idx} href={x.link} style={{ minWidth: "70px", textAlign: "center", textDecoration: "none", color: "#111" }}>
@@ -395,7 +406,7 @@ export default function AccountDashboard() {
           </div>
           <div style={{ flex: 1, minWidth: 0 }}>
             <p style={{ fontSize: "10px", fontWeight: "900", background: "rgba(0,0,0,0.25)", display: "inline-block", padding: "3px 10px", borderRadius: "20px", margin: 0 }}>✨ BAHARAZ MEMBER</p>
-            <h1 style={{ fontSize: "18px", fontWeight: "900", margin: "6px 0 0 0" }}>Welcome, {displayName} 👋</h1>
+            <h1 style={{ fontSize: "18px", fontWeight: "900", margin: "6px 0 0 0" }}>Welcome, {displayName} 👋 🪙 {coins}</h1>
             <p style={{ fontSize: "11px", opacity: 0.95, margin: "4px 0 0 0" }}>{user?.email || ""} • {stats.totalOrders} Orders • ৳{stats.totalSpent} Spent</p>
           </div>
           <Link href="/account/profile" style={{ background: "white", color: "#f85606", padding: "9px 18px", borderRadius: "20px", fontWeight: "900", fontSize: "12px", textDecoration: "none" }}>Edit Profile →</Link>
@@ -463,6 +474,8 @@ export default function AccountDashboard() {
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", marginTop: "14px" }}>
                 <Link href="/account/orders" style={{ background: "#fff1eb", padding: "14px", borderRadius: "12px", textAlign: "center", textDecoration: "none", color: "black", fontWeight: "800", fontSize: "11px" }}>📦<br />My Orders<br /><span style={{ fontSize: "9px", color: "#f85606" }}>{stats.totalOrders} orders</span></Link>
                 <Link href="/account/wishlist" style={{ background: "#fef2f2", padding: "14px", borderRadius: "12px", textAlign: "center", textDecoration: "none", color: "black", fontWeight: "800", fontSize: "11px" }}>❤️<br />Wishlist<br /><span style={{ fontSize: "9px", color: "#dc2626" }}>{stats.wishlistCount} items</span></Link>
+                <Link href="/account/coins" style={{ background: "#FFF8E1", padding: "14px", borderRadius: "12px", textAlign: "center", textDecoration: "none", color: "black", fontWeight: "800", fontSize: "11px" }}>🪙<br />My Coins<br /><span style={{ fontSize: "9px", color: "#E65100" }}>{coins} coins</span></Link>
+                <Link href="/account/vouchers" style={{ background: "#E8F5E9", padding: "14px", borderRadius: "12px", textAlign: "center", textDecoration: "none", color: "black", fontWeight: "800", fontSize: "11px" }}>🎫<br />Vouchers<br /><span style={{ fontSize: "9px", color: "#2E7D32" }}>{vouchers} vouchers</span></Link>
                 <Link href="/account/profile" style={{ background: "#f0f9ff", padding: "14px", borderRadius: "12px", textAlign: "center", textDecoration: "none", color: "black", fontWeight: "800", fontSize: "11px" }}>🛡️<br />Edit Profile</Link>
                 <Link href="/cart" style={{ background: "#f0fdf4", padding: "14px", borderRadius: "12px", textAlign: "center", textDecoration: "none", color: "black", fontWeight: "800", fontSize: "11px" }}>🛒<br />My Cart<br /><span style={{ fontSize: "9px", color: "#16a34a" }}>{cartCount} items</span></Link>
               </div>

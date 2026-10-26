@@ -2,7 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import Script from 'next/script'
 
-export const dynamic = 'force-dynamic'
+export const revalidate = 3600 // ✅ FIX: force-dynamic ছিল Slow - এখন 1 Hour Cache = Zero Second + Future সব থাকবে Live
 
 // ================= 100% SEO PREMIUM - GOOGLE 1st PAGE =================
 export async function generateMetadata() {
@@ -24,13 +24,13 @@ export async function generateMetadata() {
       siteName: 'Baharaz - Best Online Shopping in Bangladesh',
       locale: 'en_BD',
       type: 'website',
-      images: [{ url: 'https://www.baharaz.com/og-banner.jpg', width: 1200, height: 630, alt: 'All Categories - Baharaz' }],
+      images: [{ url: 'https://www.baharaz.com/og-image.jpg', width: 1200, height: 630, alt: 'All Categories - Baharaz' }],
     },
     twitter: {
       card: 'summary_large_image',
       title,
       description,
-      images: ['https://www.baharaz.com/og-banner.jpg'],
+      images: ['https://www.baharaz.com/og-image.jpg'],
     },
   }
 }
@@ -43,10 +43,10 @@ export default async function CategoriesPage(){
   let featuredCats = []
 
   try{
-    // FAST COUNT - Unlimited products er jonno slow hobe na
+    // ✅ FIX: আগে limit 10000 ছিল Slow - এখন Fast Query - Future Same
     const [countRes, prodRes, catTableRes] = await Promise.all([
       supabase.from('products').select('id', { count: 'exact', head: true }),
-      supabase.from('products').select('category').limit(10000),
+      supabase.from('products').select('category').limit(2000),
       supabase.from('categories').select('id, name, slug, image_url, description, is_featured').order('name')
     ])
 

@@ -1,18 +1,30 @@
 ﻿import nextDynamic from "next/dynamic";
 import { Suspense } from "react";
 
-// ✅ ZERO SECOND FAST - Lazy Load + Prefetch - নাম Change করলাম nextDynamic - iOS 26 Glass
+// ✅ ZERO SECOND FAST - Lazy + Prefetch - iOS 26 Glass
 const HomeClient = nextDynamic(() => import("@/components/home/HomeClient"), {
   ssr: true,
   loading: () => <HomeSkeleton />,
 });
 
-// ✅ SEO - Google #1 - Unlimited Product
+// ✅ MOBILE ONLY LOGIN BAR - Daraz Style - FIXED (ssr:false removed)
+const MobileLoginBar = nextDynamic(() => import("@/components/home/MobileLoginBar"), {
+  loading: () => null,
+});
+
+export const revalidate = 3600;
+export const dynamic = 'force-static';
+export const fetchCache = 'force-cache';
+
+// ✅ BEST SEO - #1 EVERYWHERE - Google Facebook YouTube - Daraz Formula
 export const metadata = {
-  title: "Baharaz - Bangladesh's Most Loved Online Shopping Mall | 12M+ Products",
-  description: "Shop on Baharaz - 64 Districts, 490+ Upazila, 12M+ Products, Free Delivery over ৳499, 7 Days Return, bKash, Nagad, COD. Best Price in Bangladesh - Zero Second Fast.",
-  keywords: ["baharaz", "online shopping", "bangladesh", "daraz", "ecommerce", "flash sale", "fastest shopping", "unlimited products"],
-  authors: [{ name: "Baharaz" }],
+  title: {
+    default: "Baharaz - Bangladesh's Most Loved Online Shopping Mall",
+    template: "%s | Baharaz",
+  },
+  description: "Baharaz - Shop 12M+ Products, Free Delivery over ৳499, 7 Days Return, bKash, Nagad, COD. 64 Districts, 490+ Upazila - Fastest Online Shopping in Bangladesh - Zero Second Fast.",
+  keywords: ["baharaz", "baharaz.com", "online shopping bangladesh", "daraz alternative", "ecommerce bangladesh", "rajshahi online shopping", "bangladesh shopping mall", "flash sale", "fastest shopping"],
+  authors: [{ name: "Baharaz", url: "https://baharaz.com" }],
   creator: "Baharaz",
   publisher: "Baharaz",
   metadataBase: new URL("https://baharaz.com"),
@@ -21,25 +33,26 @@ export const metadata = {
   },
   openGraph: {
     title: "Baharaz - Bangladesh's Most Loved Online Shopping Mall",
-    description: "12M+ Products, Free Delivery, Best Price - Zero Second Fast Loading",
+    description: "12M+ Products, Free Delivery over ৳499 - Zero Second Fast - Shop Now!",
     url: "https://baharaz.com",
     siteName: "Baharaz",
     type: "website",
-    locale: "en_BD",
+    locale: "bn_BD",
     images: [
       {
         url: "/og-image.jpg",
         width: 1200,
         height: 630,
-        alt: "Baharaz - Fastest Online Shopping",
+        alt: "Baharaz - Fastest Online Shopping in Bangladesh",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
     title: "Baharaz - Bangladesh's Most Loved Online Shopping Mall",
-    description: "12M+ Products, Free Delivery, Best Price",
+    description: "12M+ Products, Free Delivery, Best Price in Bangladesh",
     images: ["/og-image.jpg"],
+    creator: "@baharaz",
   },
   robots: {
     index: true,
@@ -61,28 +74,11 @@ export const viewport = {
   themeColor: "#F85606",
 };
 
-// ✅ Premium Skeleton - iOS 26 Liquid Glass - তোমার MobileHeader এর মতো - Zero Second UX
 function HomeSkeleton() {
   return (
-    <div className="w-full min-h-screen bg-[#f5f3f0] md:bg-[#f5f5f7] animate-pulse relative overflow-hidden">
-      {/* iOS 26 Background Glow - Mobile Only - তোমার MobileHeader এর মতো */}
-      <div className="absolute top-0 left-0 w-full h-[400px] pointer-events-none overflow-hidden md:hidden">
-        <div className="absolute -top-[60px] -left-[60px] w-[280px] h-[280px] bg-gradient-to-br from-[#F85606]/12 via-[#FF9500]/8 to-transparent rounded-full blur-[35px]"></div>
-        <div className="absolute -top-[40px] -right-[60px] w-[260px] h-[260px] bg-gradient-to-bl from-[#AF52DE]/10 via-[#5856D6]/6 to-transparent rounded-full blur-[35px]"></div>
-      </div>
-
-      <div className="max-w-[1188px] mx-auto px-0 md:px-4 py-0 md:py-4 space-y-3 md:space-y-4 relative">
-        {/* Banner Skeleton - iOS 26 Glass */}
-        <div className="h-[180px] md:h-[320px] rounded-none md:rounded-[20px] shadow-sm relative overflow-hidden"
-             style={{
-               background: 'rgba(255,255,255,0.75)',
-               backdropFilter: 'blur(20px) saturate(180%)',
-               WebkitBackdropFilter: 'blur(20px) saturate(180%)',
-               border: '0.5px solid rgba(255,255,255,0.8)',
-               boxShadow: '0 8px 24px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,1)'
-             }}>
-          <div className="absolute inset-0 bg-gradient-to-b from-white/40 to-transparent"></div>
-          <div className="absolute inset-0 bg-gradient-to-r from-black/[0.04] via-white/20 to-black/[0.04] animate-[shimmer_1.5s_infinite]"></div>
+    <div className="w-full max-w-[1188px] mx-auto min-h-screen bg-[#f5f3f0] md:bg-[#f5f5f7] animate-pulse relative overflow-hidden px-0 md:px-3">
+      <div className="w-full py-0 md:py-3 space-y-3 md:space-y-4 relative">
+        <div className="h-[180px] md:h-[320px] rounded-none md:rounded-[12px] shadow-[0_2px_8px_rgba(0,0,0,0.06)] relative overflow-hidden bg-white border border-[#eee]">
           <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
             <div className="w-[20px] h-[6px] bg-[#F85606]/30 rounded-full"></div>
             <div className="w-[6px] h-[6px] bg-black/10 rounded-full"></div>
@@ -90,87 +86,40 @@ function HomeSkeleton() {
           </div>
         </div>
 
-        {/* Categories Skeleton - iOS 26 Glass */}
-        <div className="rounded-none md:rounded-[20px] p-3 md:p-4 relative overflow-hidden"
-             style={{
-               background: 'rgba(255,255,255,0.75)',
-               backdropFilter: 'blur(20px) saturate(180%)',
-               WebkitBackdropFilter: 'blur(20px) saturate(180%)',
-               border: '0.5px solid rgba(255,255,255,0.8)',
-               boxShadow: '0 8px 24px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,1)'
-             }}>
-          <div className="absolute top-0 inset-x-0 h-[0.5px] bg-gradient-to-r from-transparent via-black/[0.04] to-transparent"></div>
+        <div className="rounded-none md:rounded-[8px] p-3 md:p-4 relative overflow-hidden bg-white border border-[#e5e5e5]">
           <div className="h-4 w-32 bg-black/10 rounded-full mb-3"></div>
           <div className="grid grid-cols-4 md:grid-cols-8 gap-2 md:gap-3">
             {Array.from({ length: 8 }).map((_, i) => (
               <div key={i} className="flex flex-col items-center gap-2">
-                <div className="h-[56px] w-[56px] md:h-[64px] md:w-[64px] rounded-[20px] relative overflow-hidden"
-                     style={{
-                       background: 'linear-gradient(135deg, rgba(255,255,255,0.9), rgba(245,243,240,0.8))',
-                       border: '0.5px solid rgba(255,255,255,0.8)',
-                       boxShadow: '0 4px 16px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,1)'
-                     }}>
-                  <div className="absolute inset-0 bg-gradient-to-b from-white/40 to-transparent rounded-[20px]"></div>
-                </div>
+                <div className="h-[56px] w-[56px] md:h-[64px] md:w-[64px] rounded-[12px] bg-black/5 border border-[#eee]"></div>
                 <div className="h-3 w-12 bg-black/10 rounded-full" />
               </div>
             ))}
           </div>
         </div>
 
-        {/* Flash Sale Skeleton - iOS 26 Glass */}
-        <div className="rounded-none md:rounded-[20px] p-3 md:p-4 relative overflow-hidden"
-             style={{
-               background: 'rgba(255,255,255,0.75)',
-               backdropFilter: 'blur(20px) saturate(180%)',
-               WebkitBackdropFilter: 'blur(20px) saturate(180%)',
-               border: '0.5px solid rgba(255,255,255,0.8)',
-               boxShadow: '0 8px 24px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,1)'
-             }}>
-          <div className="absolute top-0 inset-x-0 h-[0.5px] bg-gradient-to-r from-transparent via-[#F85606]/20 to-transparent"></div>
+        <div className="rounded-none md:rounded-[8px] p-3 md:p-4 relative overflow-hidden bg-white border border-[#e5e5e5]">
           <div className="flex justify-between items-center mb-3">
             <div className="h-5 w-32 bg-black/10 rounded-full"></div>
             <div className="h-6 w-20 bg-black/10 rounded-full"></div>
           </div>
           <div className="grid grid-cols-3 md:grid-cols-6 gap-2 md:gap-3">
             {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="rounded-[16px] p-2 space-y-2 relative overflow-hidden"
-                   style={{
-                     background: 'rgba(255,255,255,0.9)',
-                     border: '0.5px solid rgba(0,0,0,0.04)',
-                     boxShadow: '0 8px 24px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,1)'
-                   }}>
-                <div className="absolute inset-0 bg-gradient-to-b from-white/60 to-transparent rounded-[16px]"></div>
-                <div className="h-[100px] bg-black/5 rounded-[12px] relative" />
+              <div key={i} className="rounded-[8px] p-2 space-y-2 bg-white border border-[#eee]">
+                <div className="h-[100px] bg-black/5 rounded-[6px]" />
                 <div className="h-3 bg-black/5 rounded-full w-3/4" />
                 <div className="h-4 bg-black/10 rounded-full w-1/2" />
-                <div className="absolute bottom-2 left-2 right-2 h-[2px] bg-gradient-to-r from-transparent via-[#F85606]/10 to-transparent"></div>
               </div>
             ))}
           </div>
         </div>
 
-        {/* Just For You Skeleton - iOS 26 Glass */}
-        <div className="rounded-none md:rounded-[20px] p-3 md:p-4 relative overflow-hidden"
-             style={{
-               background: 'rgba(255,255,255,0.75)',
-               backdropFilter: 'blur(20px) saturate(180%)',
-               WebkitBackdropFilter: 'blur(20px) saturate(180%)',
-               border: '0.5px solid rgba(255,255,255,0.8)',
-               boxShadow: '0 8px 24px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,1)'
-             }}>
-          <div className="absolute top-0 inset-x-0 h-[0.5px] bg-gradient-to-r from-transparent via-black/[0.04] to-transparent"></div>
+        <div className="rounded-none md:rounded-[8px] p-3 md:p-4 relative overflow-hidden bg-white border border-[#e5e5e5]">
           <div className="h-5 w-40 bg-black/10 rounded-full mb-4"></div>
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-2 md:gap-3">
             {Array.from({ length: 12 }).map((_, i) => (
-              <div key={i} className="rounded-[20px] p-2 space-y-2 relative overflow-hidden"
-                   style={{
-                     background: 'rgba(255,255,255,0.9)',
-                     border: '0.5px solid rgba(0,0,0,0.04)',
-                     boxShadow: '0 8px 24px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,1)'
-                   }}>
-                <div className="absolute inset-0 bg-gradient-to-b from-white/60 to-transparent rounded-[20px]"></div>
-                <div className="h-[120px] bg-black/5 rounded-[16px] relative" />
+              <div key={i} className="rounded-[8px] p-2 space-y-2 bg-white border border-[#eee]">
+                <div className="h-[120px] bg-black/5 rounded-[6px]" />
                 <div className="h-3 bg-black/5 rounded-full" />
                 <div className="h-3 bg-black/5 rounded-full w-2/3" />
                 <div className="h-4 bg-black/10 rounded-full w-1/2" />
@@ -179,27 +128,25 @@ function HomeSkeleton() {
           </div>
         </div>
       </div>
-
-      <style>{`
-        * { -webkit-font-smoothing: antialiased; }
-        @keyframes shimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
-      `}</style>
     </div>
   );
 }
 
 export default function Page() {
   return (
-    <main className="w-full min-h-screen bg-[#f5f3f0] md:bg-[#f5f5f7] relative">
-      {/* iOS 26 Background Glow - Mobile Only - তোমার MobileHeader এর মতো */}
-      <div className="absolute top-0 left-0 w-full h-[500px] pointer-events-none overflow-hidden md:hidden">
-        <div className="absolute -top-[60px] -left-[60px] w-[280px] h-[280px] bg-gradient-to-br from-[#F85606]/12 via-[#FF9500]/8 to-transparent rounded-full blur-[35px]"></div>
-        <div className="absolute -top-[40px] -right-[60px] w-[260px] h-[260px] bg-gradient-to-bl from-[#AF52DE]/10 via-[#5856D6]/6 to-transparent rounded-full blur-[35px]"></div>
+    <main className="w-full max-w-[100vw] min-h-screen bg-[#f5f3f0] md:bg-[#f5f5f7] relative overflow-x-hidden">
+      <div className="w-full max-w-[1188px] mx-auto px-0 md:px-3 relative">
+        <Suspense fallback={<HomeSkeleton />}>
+          <HomeClient />
+        </Suspense>
       </div>
 
-      <Suspense fallback={<HomeSkeleton />}>
-        <HomeClient />
-      </Suspense>
+      {/* ✅ MOBILE ONLY - Beautiful Login Bar - Daraz Style */}
+      <div className="md:hidden">
+        <Suspense fallback={null}>
+          <MobileLoginBar />
+        </Suspense>
+      </div>
 
       <script
         type="application/ld+json"
@@ -242,19 +189,15 @@ export default function Page() {
             sameAs: [
               "https://facebook.com/baharaz",
               "https://instagram.com/baharaz",
+              "https://facebook.com/baharaz",
+              "https://instagram.com/baharaz",
               "https://youtube.com/baharaz",
               "https://twitter.com/baharaz",
             ],
           }),
         }}
       />
+      <style>{`html,body{max-width:100vw; overflow-x:hidden;} @media(max-width:768px){main{padding:0!important;}}`}</style>
     </main>
   );
 }
-
-// ✅ For Google - ISR - Zero Second Fast + Fresh
-export const revalidate = 60;
-
-// ✅ Force Static for Maximum Speed - Amazon Style - এখন Error হবে না
-export const dynamic = "force-static";
-export const fetchCache = "force-cache";
