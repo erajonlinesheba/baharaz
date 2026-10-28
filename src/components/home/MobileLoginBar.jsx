@@ -1,10 +1,11 @@
 'use client'
 import { useState, useEffect } from 'react'
-import { supabase } from '@/lib/supabase'
+import { createClient } from '@/lib/supabase/client'
 
 export default function MobileLoginBar(){
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(false)
+  const supabase = createClient() // এই লাইনটা তোমার Code এ নাই - এটাই Error
   
   useEffect(()=>{
     // Check user
@@ -18,6 +19,8 @@ export default function MobileLoginBar(){
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (session?.user) {
         setUser(session.user)
+      } else {
+        setUser(null)
       }
     })
     return () => subscription.unsubscribe()

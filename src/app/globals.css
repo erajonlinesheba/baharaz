@@ -296,7 +296,7 @@ main {
   z-index: 1 !important;
   width: 100% !important;
   overflow: visible !important;
-  padding-top: 8px !important;
+  padding-top: 0 !important;
   margin-top: 0 !important;
   background: #F8FAFC;
 }
@@ -356,4 +356,12 @@ nav, [class*="Categories"], [class*="categories"] {
 .container, .max-w-7xl, .mx-auto {
   position: relative;
   z-index: 1;
+}
+
+/* ============= SIDEBAR & PAGE আলাদা SCROLL - শুধু এইটুকু Add করলাম ============= */
+.account-wrap .side .list{
+  overscroll-behavior: contain;
+}
+.account-wrap .page-in{
+  overscroll-behavior: contain;
 }

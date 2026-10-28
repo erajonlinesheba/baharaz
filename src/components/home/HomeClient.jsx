@@ -112,14 +112,14 @@ export default function HomeClient(){
   }, [])
 
   return (
-    <div className="w-full bg-[#f5f5f5] min-h-screen">
-      <div className="w-full max-w-[1188px] mx-auto">
+    <div className="w-full bg-[#f5f5f5] min-h-screen m-0 p-0">
+      <div className="w-full max-w-[1188px] mx-auto m-0 md:mt-0 p-0">
         
-        {/* Banner - Desktop 344px as Daraz */}
-        <div id="top" className="w-full">
+        {/* Banner - Desktop 344px as Daraz - HEADER ER SATHE LEGE THAKBE - GAP 0 */}
+        <div id="top" className="w-full m-0 p-0 mt-0 pt-0">
           {!isLoggedIn ? (
             <>
-              <div className="hidden md:block mt-3">
+              <div className="hidden md:block mt-0 pt-0">
                 <BannerSlider />
               </div>
               <div className="block md:hidden mt-0 w-full h-[76px] bg-gradient-to-r from-[#FFC107] to-[#FF5722] flex items-center justify-center relative">

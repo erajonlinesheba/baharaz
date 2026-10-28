@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
+import { createPortal } from 'react-dom'
 
 export default function TopBar(){
   const [user, setUser] = useState(() => {
@@ -37,8 +38,13 @@ export default function TopBar(){
     }
     return false
   })
+  const [mounted, setMounted] = useState(false)
+  const [menuPos, setMenuPos] = useState({ top: 102, right: 8 })
   const appRef = useRef(null)
+  const profileBtnRef = useRef(null)
   const supabase = createClient()
+
+  useEffect(()=>{ setMounted(true) },[])
 
   useEffect(()=>{
     const saved = localStorage.getItem('baharaz-lang')
@@ -55,6 +61,25 @@ export default function TopBar(){
     }
   },[])
 
+  const updateMenuPos = () => {
+    if(profileBtnRef.current){
+      const rect = profileBtnRef.current.getBoundingClientRect()
+      // আরো নিচে + আরো ডানে - হেডারের নিচে বের হবে
+      // Topbar 28px + Header 64px + 10px gap = 102px
+      const headerHeight = 28 + 64
+      const rightFromFrame = Math.max(4, window.innerWidth - rect.right - 50)
+      setMenuPos({ top: headerHeight + 10, right: rightFromFrame })
+    }
+  }
+
+  useEffect(()=>{
+    if(showProfileMenu) updateMenuPos()
+    const onResize = () => { if(showProfileMenu) updateMenuPos() }
+    window.addEventListener('resize', onResize)
+    window.addEventListener('scroll', onResize)
+    return ()=>{ window.removeEventListener('resize', onResize); window.removeEventListener('scroll', onResize) }
+  },[showProfileMenu])
+
   const toggleLanguage = () => {
     const newLang = lang === 'en'? 'bn' : 'en'
     setLang(newLang)
@@ -64,22 +89,22 @@ export default function TopBar(){
   }
 
   useEffect(()=>{
-    let mounted = true
+    let mountedFlag = true
     
     const loadProfile = async (currentUser) => {
       if(!currentUser){
         const hasCache = localStorage.getItem('baharaz-profile')
-        if(!hasCache && mounted){
+        if(!hasCache && mountedFlag){
           setUser(null)
           setProfile({ full_name: '', avatar: '', email: '' })
           setAuthChecked(true)
         }
-        if(mounted && !hasCache){
+        if(mountedFlag && !hasCache){
           setAuthChecked(true)
         }
         return
       }
-      if(mounted) setUser(currentUser)
+      if(mountedFlag) setUser(currentUser)
       const meta = currentUser.user_metadata || {}
       let avatar = meta.avatar_url || meta.picture || meta.avatar || ''
       let rawName = meta.full_name || meta.name || currentUser.email?.split('@')[0] || 'My Account'
@@ -91,7 +116,7 @@ export default function TopBar(){
         if(prof?.avatar_url) avatar = prof.avatar_url
       }catch{}
 
-      if(mounted){
+      if(mountedFlag){
         const finalProfile = { 
           full_name: rawName.toUpperCase(), 
           avatar: avatar,
@@ -112,9 +137,9 @@ export default function TopBar(){
       try{
         const { data: { session } } = await supabase.auth.getSession()
         if(session?.user){
-          if(mounted) await loadProfile(session.user)
+          if(mountedFlag) await loadProfile(session.user)
         } else {
-          if(mounted){
+          if(mountedFlag){
             const hasCache = localStorage.getItem('baharaz-profile')
             if(!hasCache){
               setAuthChecked(true)
@@ -125,7 +150,7 @@ export default function TopBar(){
           }
         }
       }catch{
-        if(mounted) setAuthChecked(true)
+        if(mountedFlag) setAuthChecked(true)
       }
     }
     
@@ -133,7 +158,7 @@ export default function TopBar(){
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if(event === 'SIGNED_OUT'){
-        if(mounted){
+        if(mountedFlag){
           setUser(null)
           setProfile({ full_name: '', avatar: '', email: '' })
           setAuthChecked(true)
@@ -141,18 +166,18 @@ export default function TopBar(){
         }
         return
       }
-      if(mounted) await loadProfile(session?.user || null)
+      if(mountedFlag) await loadProfile(session?.user || null)
     })
 
     const onAuth = async() => {
       const { data:{ user: u } } = await supabase.auth.getUser()
-      if(mounted) await loadProfile(u)
+      if(mountedFlag) await loadProfile(u)
     }
     window.addEventListener('authChanged', onAuth)
     window.addEventListener('profileUpdated', onAuth)
     
     return ()=>{ 
-      mounted=false
+      mountedFlag=false
       subscription.unsubscribe()
       window.removeEventListener('authChanged', onAuth)
       window.removeEventListener('profileUpdated', onAuth)
@@ -177,14 +202,14 @@ export default function TopBar(){
 
   return (
     <>
-      <div className="w-full bg-[#F85606] h-[28px] flex items-center relative z-[1000] overflow-hidden" suppressHydrationWarning>
+      <div className="w-full bg-[#F85606] h-[28px] flex items-center relative z-[9999]" suppressHydrationWarning>
         <div className="w-full max-w-[1188px] mx-auto px-3 h-[28px] flex items-center justify-between text-white text-[11px] font-medium gap-2">
           
           <div className="hidden md:flex items-center gap-5 shrink-0">
             <div className="relative flex items-center gap-1 cursor-pointer" ref={appRef} onMouseEnter={()=>setShowAppQR(true)} onMouseLeave={()=>setShowAppQR(false)}>
               <span className="uppercase tracking-wide whitespace-nowrap">Save More On App</span>
               {showAppQR && (
-                <div className="absolute top-[28px] left-0 w-[300px] bg-white rounded-[8px] shadow-[0_10px_40px_rgba(0,0,0,0.2)] p-4 z-[3000] flex gap-3 border">
+                <div className="absolute top-[38px] left-0 w-[300px] bg-white rounded-[8px] shadow-[0_10px_40px_rgba(0,0,0,0.2)] p-4 z-[9999] flex gap-3 border">
                   <img src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=https://baharaz.com" alt="QR" className="w-[100px] h-[100px] border rounded" />
                   <div className="flex-1">
                     <p className="text-black font-bold text-[13px] leading-tight">Enjoy 15% Off + Free Delivery</p>
@@ -200,7 +225,7 @@ export default function TopBar(){
             <Link href="/help" className="hover:text-white/80 hidden sm:block shrink-0">Help & Support</Link>
             <Link href="/track-order" className="hover:text-white/80 hidden md:block shrink-0">Track Order</Link>
             
-            <div className="relative w-[135px] h-[28px] shrink-0 flex items-center justify-end overflow-hidden" suppressHydrationWarning>
+            <div className="relative w-[135px] h-[28px] shrink-0 flex items-center justify-end">
               {!authChecked ? (
                 <div className="absolute right-0 flex items-center gap-3">
                   <span className="w-[80px] h-[12px] bg-white/20 rounded animate-pulse inline-block"></span>
@@ -213,8 +238,9 @@ export default function TopBar(){
               ) : (
                 <div className="absolute right-0 flex items-center justify-end max-w-[135px]">
                   <button 
-                    onClick={()=>setShowProfileMenu(!showProfileMenu)}
-                    onMouseEnter={()=>setShowProfileMenu(true)}
+                    ref={profileBtnRef}
+                    onClick={()=>{ updateMenuPos(); setShowProfileMenu(!showProfileMenu)}}
+                    onMouseEnter={()=>{ updateMenuPos(); setShowProfileMenu(true)}}
                     className="opacity-95 hover:opacity-100 cursor-pointer font-bold whitespace-nowrap bg-transparent border-0 text-white text-[11px] uppercase tracking-wide flex items-center gap-1.5"
                   >
                     {profile.avatar ? (
@@ -232,20 +258,21 @@ export default function TopBar(){
               )}
             </div>
 
-            <button onClick={toggleLanguage} className="w-[36px] md:w-[45px] min-w-[36px] h-[20px] bg-white/15 hover:bg-white/25 px-2 py-0.5 rounded-[4px] font-black flex items-center justify-center shrink-0 ml-1 overflow-hidden">
+            <button onClick={toggleLanguage} className="w-[36px] md:w-[45px] min-w-[36px] h-[20px] bg-white/15 hover:bg-white/25 px-2 py-0.5 rounded-[4px] font-black flex items-center justify-center shrink-0 ml-1">
               {lang==='en'? 'ভাষা' : 'EN'}
             </button>
           </div>
         </div>
       </div>
 
-      {user && showProfileMenu && (
+      {mounted && user && showProfileMenu && createPortal(
         <>
-          <div className="fixed inset-0 z-[999998]" onClick={()=>setShowProfileMenu(false)}></div>
+          <div className="fixed inset-0 z-[999998] bg-transparent" onClick={()=>setShowProfileMenu(false)}></div>
           <div 
-            className="fixed top-[28px] right-2 md:right-[calc((100vw-1188px)/2+10px)] w-[300px] max-w-[95vw] bg-white rounded-[12px] shadow-[0_20px_60px_rgba(0,0,0,0.25)] z-[999999] border border-gray-100 overflow-hidden"
+            className="fixed w-[300px] max-w-[95vw] bg-white rounded-[12px] shadow-[0_20px_60px_rgba(0,0,0,0.25)] z-[999999] border border-gray-100 overflow-hidden"
+            style={{ top: `${menuPos.top}px`, right: `${menuPos.right}px` }}
             onMouseLeave={()=>setShowProfileMenu(false)}
-            onMouseEnter={()=>setShowProfileMenu(true)}
+            onMouseEnter={()=>{ updateMenuPos(); setShowProfileMenu(true)}}
           >
             <div className="px-5 py-4 flex items-center gap-3 border-b border-gray-100">
               {profile.avatar ? (
@@ -284,7 +311,8 @@ export default function TopBar(){
               </div>
             </div>
           </div>
-        </>
+        </>,
+        document.body
       )}
     </>
   )

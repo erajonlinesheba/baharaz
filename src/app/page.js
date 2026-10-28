@@ -134,7 +134,7 @@ function HomeSkeleton() {
 
 export default function Page() {
   return (
-    <main className="w-full max-w-[100vw] min-h-screen bg-[#f5f3f0] md:bg-[#f5f5f7] relative overflow-x-hidden">
+    <main className="w-full max-w-full min-h-screen bg-[#f5f3f0] md:bg-[#f5f5f7] relative overflow-x-hidden">
       <div className="w-full max-w-[1188px] mx-auto px-0 md:px-3 relative">
         <Suspense fallback={<HomeSkeleton />}>
           <HomeClient />
@@ -197,7 +197,7 @@ export default function Page() {
           }),
         }}
       />
-      <style>{`html,body{max-width:100vw; overflow-x:hidden;} @media(max-width:768px){main{padding:0!important;}}`}</style>
+      <style>{`html,body{max-width:100%; overflow-x:hidden;} body{margin:0; padding:0;} @media(max-width:768px){main{padding:0!important;}}`}</style>
     </main>
   );
 }

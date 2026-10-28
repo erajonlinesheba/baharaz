@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 
 const MENU = [
   { href: "/account", label: "Dashboard", Icon: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/></svg> },
@@ -21,28 +21,35 @@ const MENU = [
 export default function AccountLayout({ children }) {
   const pathname = usePathname();
   const router = useRouter();
-  const [open, setOpen] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const [hover, setHover] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
-  const scrollRef = useRef(null);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
     const check = () => setIsMobile(window.innerWidth <= 900);
     check();
     window.addEventListener("resize", check);
-    const toggle = () => setOpen(v => !v);
+    const toggle = () => { if (window.innerWidth <= 900) setMobileOpen(v => !v); };
     window.addEventListener("toggleAccountSidebar", toggle);
+    const style = document.createElement('style');
+    style.id = 'account-only-hide-scrollbar';
+    style.innerHTML = `html,body{scrollbar-width:none!important;-ms-overflow-style:none!important}html::-webkit-scrollbar,body::-webkit-scrollbar{display:none!important;width:0!important;height:0!important}`;
+    document.head.appendChild(style);
     return () => {
       window.removeEventListener("resize", check);
       window.removeEventListener("toggleAccountSidebar", toggle);
+      const s = document.getElementById('account-only-hide-scrollbar');
+      if (s) s.remove();
     };
   }, []);
 
-  // ✅ FIXED: আগের মত pathname এ setOpen(false) করবে না, তাই আর লাফাবে না
   useEffect(() => {
-    setHover(false);
-    if (scrollRef.current) scrollRef.current.scrollTop = 0;
-  }, [pathname]);
+    if (!isMobile) { setHover(false); return; }
+    if (pathname === "/account") setMobileOpen(false);
+    else if (pathname.startsWith("/account/")) setMobileOpen(true);
+  }, [pathname, isMobile]);
 
   const handleLogout = async () => {
     try {
@@ -55,58 +62,100 @@ export default function AccountLayout({ children }) {
     } catch { router.push("/"); }
   };
 
-  const sideW = !open ? 0 : isMobile ? 72 : hover ? 220 : 72;
+  if (!mounted) return null;
+  const sideW = isMobile ? (mobileOpen ? 64 : 0) : hover ? 210 : 64;
 
   return (
     <div className="account-wrap" style={{ gridTemplateColumns: `${sideW}px 1fr` }}>
-      <aside onMouseEnter={() => !isMobile && open && setHover(true)} onMouseLeave={() => !isMobile && setHover(false)} className={`side ${open ? "open" : "close"} ${hover ? "hovered" : ""} ${isMobile ? "mobile" : "desktop"}`}>
+      <aside onMouseEnter={() => !isMobile && setHover(true)} onMouseLeave={() => !isMobile && setHover(false)} className={`side ${isMobile ? (mobileOpen ? "open" : "close") : "open"} ${hover ? "hovered" : ""} ${isMobile ? "mobile" : "desktop"}`}>
         <Link href="/" className="top"><div className="logo">B</div><b className="brand">Baharaz</b></Link>
         <div className="list">
           {MENU.map(m => {
             const ac = m.href === "/account" ? pathname === "/account" : pathname.startsWith(m.href);
             return (<Link key={m.href} href={m.href} className={ac ? "it ac" : "it"}><span className="ic"><m.Icon/></span><span className="lb">{m.label}</span></Link>);
           })}
-          <div className="divline" />
-          <button onClick={handleLogout} className="it logout"><span className="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></span><span className="lb">Logout</span></button>
+          <div className="logout-wrap">
+            <div className="divline" />
+            <button onClick={handleLogout} className="it logout"><span className="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></span><span className="lb">Logout</span></button>
+          </div>
         </div>
       </aside>
       <main className="page">
-        <div key={pathname} ref={scrollRef} className="page-in">
+        <div className="page-in">
           <div className="content-inner">{children}</div>
         </div>
       </main>
       <style>{`
-        .account-wrap{display:grid;width:100%;height:calc(100dvh - 112px);min-height:calc(100dvh - 112px);background:linear-gradient(180deg,#fff7f2 0%,#f8fafc 100%);transition:grid-template-columns 0.22s ease;overflow:hidden}
-        .side{display:flex;flex-direction:column;position:relative;height:calc(100dvh - 112px);background:rgba(255,255,255,0.92);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-right:1px solid rgba(248,86,6,0.08);z-index:20;overflow:hidden;transition:all 0.22s ease;box-shadow:0 0 0 1px rgba(248,86,6,0.04), 4px 0 24px rgba(248,86,6,0.06)}
-        .side.close{width:0 !important;min-width:0 !important;border:0;overflow:hidden}
-        .top{height:58px;min-height:58px;display:flex;align-items:center;gap:12px;padding:0 14px;border-bottom:1px solid rgba(248,86,6,0.08);background:linear-gradient(135deg, rgba(248,86,6,0.08) 0%, rgba(255,138,76,0.08) 100%);flex-shrink:0;text-decoration:none}
-        .logo{width:34px;height:34px;background:linear-gradient(135deg,#F85606 0%,#FF8A4C 100%);border-radius:10px;color:#fff;font-weight:900;font-size:16px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(248,86,6,0.3)}
-        .brand{white-space:nowrap;transition:opacity .15s;color:#111;font-weight:800;letter-spacing:-0.2px}
-        .list{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;padding:10px 8px 20px 8px;display:flex;flex-direction:column;gap:3px}
-        .it{display:flex;align-items:center;gap:12px;padding:11px 12px;border-radius:12px;text-decoration:none;color:#444;font-size:13.5px;font-weight:500;white-space:nowrap;border:none;background:transparent;width:100%;cursor:pointer;text-align:left;transition:all 0.2s cubic-bezier(0.2,0.8,0.2,1)}
-        .it:hover{background:rgba(248,86,6,0.08);color:#F85606;transform:translateX(2px)}
-        .it.ac{background:linear-gradient(135deg,#F85606 0%,#FF6B2B 100%);color:#fff;box-shadow:0 4px 14px rgba(248,86,6,0.35), 0 1px 3px rgba(0,0,0,0.1);transform:translateX(1px)}
-        .it.logout{color:#ff3b30}
-        .it.logout:hover{background:rgba(255,59,48,0.08);color:#ff3b30}
-        .ic{width:20px;height:20px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:transform 0.2s}
-        .it:hover .ic{transform:scale(1.1)}
-        .ic svg{width:20px;height:20px}
-        .lb{white-space:nowrap;transition:opacity .15s}
-        .divline{height:1px;background:linear-gradient(90deg, transparent, rgba(248,86,6,0.15), transparent);margin:12px 8px}
-        .side.desktop:not(.hovered) .brand,.side.desktop:not(.hovered) .lb{opacity:0;width:0;overflow:hidden;pointer-events:none}
-        .side.desktop:not(.hovered) .it{justify-content:center;padding:11px 2px;gap:0}
-        .side.mobile .top .brand{display:none}
-        .side.mobile .it{flex-direction:column;justify-content:center;gap:4px;padding:10px 2px;font-size:9.5px;text-align:center;line-height:1.1;white-space:normal;font-weight:600}
-        .side.mobile .it .ic{background:rgba(248,86,6,0.08);width:32px;height:32px;border-radius:10px}
-        .side.mobile .it.ac .ic{background:rgba(255,255,255,0.2)}
-        .side.mobile .lb{font-size:8.5px}
-        .page{width:100%;height:calc(100dvh - 112px);min-height:calc(100dvh - 112px);background:transparent;display:flex;flex-direction:column;overflow:hidden}
-        .page-in{flex:1;width:100%;height:100%;min-height:0;overflow-y:scroll !important;overflow-x:hidden !important;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;background:transparent;scrollbar-width:thin;scrollbar-color:rgba(248,86,6,0.3) transparent}
-        .content-inner{padding:16px 14px 120px 14px;min-height:calc(100% + 2px)}
-        .page-in::-webkit-scrollbar{width:6px !important;display:block !important}
-        .page-in::-webkit-scrollbar-track{background:rgba(248,86,6,0.06) !important;border-radius:100px !important}
-        .page-in::-webkit-scrollbar-thumb{background:linear-gradient(180deg, #F85606, #FF8A4C) !important;border-radius:100px !important;min-height:40px !important}
-        @media(max-width:900px){.account-wrap{grid-template-columns:${sideW}px 1fr !important;height:calc(100dvh - 60px);min-height:calc(100dvh - 60px)}.side{height:calc(100dvh - 60px)}.page{height:calc(100dvh - 60px);min-height:calc(100dvh - 60px)}}
+        .account-wrap{display:grid;width:100%;max-width:1188px;margin:0 auto;background:#f5f5f5;align-items:start;height:calc(100vh - 80px);min-height:calc(100vh - 80px);max-height:calc(100vh - 80px);overflow:hidden;transition:grid-template-columns 0.15s ease}
+        .side{display:flex;flex-direction:column;height:calc(100vh - 80px);max-height:calc(100vh - 80px);min-height:calc(100vh - 80px);background:#fff;border-right:1px solid #e5e7eb;overflow:hidden;position:sticky;top:0;align-self:start;transition:all 0.15s ease;z-index:20}
+        .side.desktop{width:64px !important;min-width:64px !important}
+        .side.desktop.hovered{width:210px !important;min-width:210px !important;box-shadow:4px 0 20px rgba(0,0,0,0.08);z-index:30}
+        .top{height:42px;min-height:42px;max-height:42px;display:flex;align-items:center;gap:8px;padding:0 10px;border-bottom:1px solid #f0f0f0;background:#fff;text-decoration:none;flex-shrink:0}
+        .logo{width:26px;height:26px;background:#F85606;border-radius:6px;color:#fff;font-weight:900;font-size:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+        .brand{white-space:nowrap;color:#111;font-weight:800;font-size:13px}
+        .list{flex:1;overflow-y:auto !important;overflow-x:hidden !important;padding:4px;display:flex;flex-direction:column;gap:1px;scrollbar-width:none;-ms-overflow-style:none;overscroll-behavior:contain}
+        .list::-webkit-scrollbar{display:none !important;width:0 !important}
+        .it{display:flex;align-items:center;gap:10px;padding:6px 10px;border-radius:8px;text-decoration:none;color:#555;font-size:12.5px;font-weight:500;white-space:nowrap;border:none;background:transparent;width:100%;cursor:pointer;min-height:32px;flex-shrink:0;transition:all 0.22s cubic-bezier(0.4,0,0.2,1);position:relative}
+        .it .ic{width:24px;height:24px;display:flex;align-items:center;justify-content:center;flex-shrink:0;border-radius:7px;background:transparent;transition:all 0.22s cubic-bezier(0.4,0,0.2,1)}
+        .it:hover{background:linear-gradient(90deg, #FFF5F0 0%, #FFEEE6 100%) !important;color:#F85606 !important;box-shadow:0 3px 10px rgba(248,86,6,0.14), 0 1px 2px rgba(248,86,6,0.08), inset 3px 0 0 #F85606 !important;transform:translateX(3px)}
+        .it:hover .ic{background:#fff !important;box-shadow:0 2px 8px rgba(248,86,6,0.18), 0 0 0 1px rgba(248,86,6,0.1) !important;transform:scale(1.08)}
+        .it.ac{background:#F85606 !important;color:#fff !important;box-shadow:0 4px 12px rgba(248,86,6,0.28) !important}
+        .it.ac .ic{background:rgba(255,255,255,0.22) !important;box-shadow:none !important}
+        .it.ac:hover{transform:none !important}
+        .it.logout{color:#ef4444}
+        .it.logout:hover{background:linear-gradient(90deg, #FFF1F2 0%, #FFE4E6 100%) !important;color:#dc2626 !important;box-shadow:0 3px 10px rgba(220,38,38,0.12), inset 3px 0 0 #ef4444 !important}
+        .ic svg{width:16px;height:16px}
+        .divline{height:1px;background:#f0f0f0;margin:4px 4px 2px 4px;flex-shrink:0}
+        .logout-wrap{margin-top:6px !important;padding:2px 0 0 0;background:#fff;flex-shrink:0}
+        .side.desktop:not(.hovered) .brand,.side.desktop:not(.hovered) .lb{display:none !important}
+        .side.desktop:not(.hovered) .it{justify-content:center;padding:5px 2px !important;gap:0}
+        .side.desktop:not(.hovered) .it:hover{transform:scale(1.08) !important}
+        .side.desktop:not(.hovered) .top{justify-content:center;padding:0 6px}
+        .page{width:100%;height:calc(100vh - 80px);max-height:calc(100vh - 80px);min-height:calc(100vh - 80px);background:#f5f5f5;display:flex;flex-direction:column;overflow:hidden;align-self:start}
+        .page-in{flex:1;width:100%;height:100%;min-height:0;max-height:calc(100vh - 80px);overflow-y:auto !important;overflow-x:hidden !important;background:#f5f5f5;overscroll-behavior:contain;scrollbar-width:thin !important;scrollbar-color:#D1D5DB transparent !important;-webkit-overflow-scrolling:touch}
+        .page-in::-webkit-scrollbar{display:block !important;width:5px !important;height:5px !important}
+        .page-in::-webkit-scrollbar-track{background:transparent !important}
+        .page-in::-webkit-scrollbar-thumb{background:#D1D5DB !important;border-radius:100px !important}
+        .page-in::-webkit-scrollbar-thumb:hover{background:#9CA3AF !important}
+        .content-inner{padding:10px 10px 140px 10px !important;background:#f5f5f5;width:100%;box-sizing:border-box;min-height:100%}
+
+        /* Desktop - আরেকটু উপরে - 22px */
+        @media(min-width:901px){
+          .account-wrap{
+            height:calc(100vh - 80px - 22px) !important;
+            max-height:calc(100vh - 80px - 22px) !important;
+            min-height:calc(100vh - 80px - 22px) !important;
+          }
+          .side{
+            height:calc(100vh - 80px - 22px) !important;
+            max-height:calc(100vh - 80px - 22px) !important;
+            min-height:calc(100vh - 80px - 22px) !important;
+          }
+          .page{height:calc(100vh - 80px - 22px) !important;max-height:calc(100vh - 80px - 22px) !important}
+          .page-in{max-height:calc(100vh - 80px - 22px) !important}
+          .list{padding-bottom:2px !important}
+          .logout-wrap{padding:6px 4px 16px 4px !important;border-top:1px solid #f0f0f0 !important}
+          .side.desktop:not(.hovered) .logout-wrap{padding-bottom:20px !important}
+        }
+
+        @media(max-width:900px){
+          .account-wrap{grid-template-columns:${sideW}px 1fr !important;max-width:100% !important;height:calc(100dvh - 56px) !important;max-height:calc(100dvh - 56px) !important;min-height:calc(100dvh - 56px) !important;overflow:hidden !important;margin:0 !important}
+          .side{position:sticky !important;top:0 !important;height:calc(100dvh - 56px) !important;max-height:calc(100dvh - 56px) !important;min-height:calc(100dvh - 56px) !important}
+          .side.mobile{width:64px !important;border-right:${mobileOpen ? '1px solid #e5e7eb' : '0'} !important}
+          .side.mobile.close{width:0 !important;min-width:0 !important;border:0 !important;overflow:hidden !important;transform:translateX(-100%) !important}
+          .side.mobile.open{transform:translateX(0) !important}
+          .side.mobile .top{justify-content:center;padding:0 6px;height:42px;min-height:42px}
+          .side.mobile .top .brand{display:none}
+          .side.mobile .it{flex-direction:column;justify-content:center;gap:2px;padding:6px 2px !important;font-size:8.5px;text-align:center;white-space:normal;font-weight:600;min-height:40px;line-height:1.1}
+          .side.mobile .it .lb{font-size:8.5px;white-space:normal;overflow:hidden;text-overflow:ellipsis;max-width:56px}
+          .side.mobile .it .ic{width:22px;height:22px;border-radius:6px;background:#f8fafc;display:flex;align-items:center;justify-content:center}
+          .side.mobile .it.ac .ic{background:#F85606 !important;color:#fff}
+          .side.mobile .it.ac{background:#fff5f0 !important;color:#F85606 !important}
+          .page{width:100% !important;height:calc(100dvh - 56px) !important;max-height:calc(100dvh - 56px) !important;min-height:calc(100dvh - 56px) !important;overflow:hidden !important}
+          .page-in{width:100% !important;height:calc(100dvh - 56px) !important;max-height:calc(100dvh - 56px) !important;overflow-y:auto !important;scrollbar-width:none !important;-ms-overflow-style:none !important}
+          .page-in::-webkit-scrollbar{display:none !important;width:0 !important;height:0 !important}
+          .content-inner{padding:8px 8px 140px 8px !important;width:100% !important;max-width:100% !important;margin:0 !important}
+        }
       `}</style>
     </div>
   );

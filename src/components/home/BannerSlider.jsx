@@ -52,7 +52,7 @@ export default function BannerSlider(){
 
   if(!mounted){
     return (
-      <div className="w-full h-[180px] md:h-[340px] md:rounded-[20px] animate-pulse relative overflow-hidden"
+      <div className="w-full max-w-full h-[180px] md:h-[344px] rounded-none md:rounded-[12px] animate-pulse relative overflow-hidden"
            style={{
              background: 'rgba(255,255,255,0.75)',
              backdropFilter: 'blur(20px) saturate(180%)',
@@ -86,14 +86,13 @@ export default function BannerSlider(){
 
   return (
     <div
-      className="relative w-full h-[180px] md:h-[340px] overflow-hidden md:rounded-[20px] select-none group"
+      className="relative w-full max-w-full h-[180px] md:h-[344px] overflow-hidden rounded-none md:rounded-[12px] select-none group mt-0"
       style={{
         background: 'rgba(255,255,255,0.85)',
         backdropFilter: 'blur(20px) saturate(180%)',
         WebkitBackdropFilter: 'blur(20px) saturate(180%)',
         border: '0.5px solid rgba(255,255,255,0.8)',
         boxShadow: '0 12px 40px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,1)',
-        borderRadius: '20px'
       }}
       onMouseEnter={()=> setPaused(true)}
       onMouseLeave={()=> setPaused(false)}
@@ -102,7 +101,7 @@ export default function BannerSlider(){
     >
       {/* iOS 26 Glass Top Shine - তোমার MobileHeader এর মতো */}
       <div className="absolute top-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-white/60 to-transparent z-20 pointer-events-none"></div>
-      <div className="absolute inset-0 bg-gradient-to-b from-white/20 to-transparent pointer-events-none z-10 rounded-[20px]"></div>
+      <div className="absolute inset-0 bg-gradient-to-b from-white/20 to-transparent pointer-events-none z-10 rounded-none md:rounded-[12px]"></div>
 
       {/* Slide - iOS 26 Glass Inner */}
       <div className="w-full h-full flex relative" style={{background: s.bg}}>
@@ -134,7 +133,7 @@ export default function BannerSlider(){
           </Link>
         </div>
 
-        <div className="w-[40%] md:w-[45%] relative h-full overflow-hidden rounded-r-[20px]">
+        <div className="w-[40%] md:w-[45%] relative h-full overflow-hidden rounded-none md:rounded-r-[12px]">
           <Image
             src={s.image}
             alt="banner"

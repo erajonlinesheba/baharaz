@@ -28,7 +28,6 @@ export default function AccountDashboard() {
   useEffect(() => {
     let isMounted = true;
     let profileChannel = null;
-
     try {
       const localCoins = Number(localStorage.getItem('baharaz_coins') || '350');
       const localCart = JSON.parse(localStorage.getItem("baharaz_cart") || "[]");
@@ -84,28 +83,11 @@ export default function AccountDashboard() {
           return;
         }
         if (isMounted) setUser(currentUser);
-
         const { data: prof } = await supabase.from("profiles").select("*").eq("id", currentUser.id).maybeSingle();
-        if (isMounted && prof) {
-          setProfile(prof);
-          setImgError(false);
-        }
-
-        profileChannel = supabase
-          .channel(`profile-dashboard-${currentUser.id}`)
-          .on('postgres_changes', { 
-            event: 'UPDATE', 
-            schema: 'public', 
-            table: 'profiles',
-            filter: `id=eq.${currentUser.id}`
-          }, (payload) => {
-            if (isMounted && payload.new) {
-              setProfile(payload.new);
-              setImgError(false);
-            }
-          })
-          .subscribe();
-
+        if (isMounted && prof) { setProfile(prof); setImgError(false); }
+        profileChannel = supabase.channel(`profile-dashboard-${currentUser.id}`).on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'profiles', filter: `id=eq.${currentUser.id}` }, (payload) => {
+            if (isMounted && payload.new) { setProfile(payload.new); setImgError(false); }
+          }).subscribe();
         supabase.from("orders").select("*").eq("user_id", currentUser.id).order("created_at", { ascending: false }).limit(20).then(({ data: orderData }) => {
           if (!isMounted) return;
           if (orderData && orderData.length > 0) {
@@ -118,39 +100,26 @@ export default function AccountDashboard() {
             });
           }
         });
-
         supabase.from("carts").select("*", { count: "exact", head: true }).eq("user_id", currentUser.id).then(({ count }) => {
           if (isMounted && count !== null) setCartCount(count);
         });
-
         supabase.from("wishlists").select("id").eq("user_id", currentUser.id).then(({ data }) => {
           if (isMounted && data && data.length > 0) setWishlist(data);
         });
-
-      } catch (e) {
-        console.log("Load error", e);
-      } finally {
-        if (isMounted) setLoading(false);
-      }
+      } catch (e) { console.log("Load error", e); } finally { if (isMounted) setLoading(false); }
     }
-
     load();
-
     const onProfileUpdated = async () => {
       try {
         const { data: sessionData } = await supabase.auth.getSession();
         const currentUser = sessionData?.session?.user;
         if (currentUser && isMounted) {
           const { data: prof } = await supabase.from("profiles").select("*").eq("id", currentUser.id).maybeSingle();
-          if (prof) {
-            setProfile(prof);
-            setImgError(false);
-          }
+          if (prof) { setProfile(prof); setImgError(false); }
           setUser(currentUser);
         }
       } catch {}
     };
-
     const onStorage = () => {
       try {
         const cart = JSON.parse(localStorage.getItem("baharaz_cart") || "[]");
@@ -163,26 +132,20 @@ export default function AccountDashboard() {
         }
       } catch {}
     };
-
     window.addEventListener("storage", onStorage);
     window.addEventListener("cartUpdated", onStorage);
     window.addEventListener("cart-update", onStorage);
     window.addEventListener("coinsUpdated", onStorage);
     window.addEventListener("profileUpdated", onProfileUpdated);
     window.addEventListener("authChanged", onProfileUpdated);
-
     const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (isMounted && session?.user) {
         setUser(session.user);
         const { data: prof } = await supabase.from("profiles").select("*").eq("id", session.user.id).maybeSingle();
         if (prof) setProfile(prof);
       }
-      if (event === "SIGNED_OUT" && isMounted) {
-        setUser(null);
-        setProfile(null);
-      }
+      if (event === "SIGNED_OUT" && isMounted) { setUser(null); setProfile(null); }
     });
-
     return () => {
       isMounted = false;
       window.removeEventListener("storage", onStorage);
@@ -209,7 +172,6 @@ export default function AccountDashboard() {
     const meta = user?.user_metadata || {};
     return profile?.full_name || meta.full_name || meta.name || user?.email?.split("@")[0] || "BAHARAZ USER";
   };
-
   const getAvatarUrl = () => {
     const meta = user?.user_metadata || {};
     if (profile?.avatar_url) return profile.avatar_url;
@@ -220,16 +182,8 @@ export default function AccountDashboard() {
 
   if (loading) {
     return (
-      <div className="daraz-mobile-root" style={{ width: "100%", background: "#f5f5f5", minHeight: "100vh", padding: "16px" }}>
-        <div style={{ background: "white", borderRadius: "16px", padding: "16px", display: "flex", gap: "12px", alignItems: "center", marginBottom: "12px" }}>
-          <div style={{ width: "60px", height: "60px", borderRadius: "50%", background: "#f0f0f0", animation: "pulse 1.5s infinite" }}></div>
-          <div style={{ flex: 1 }}>
-            <div style={{ height: "18px", width: "120px", background: "#f0f0f0", borderRadius: "6px", marginBottom: "8px", animation: "pulse 1.5s infinite" }}></div>
-            <div style={{ height: "12px", width: "180px", background: "#f0f0f0", borderRadius: "6px", animation: "pulse 1.5s infinite" }}></div>
-          </div>
-        </div>
-        <div style={{ background: "white", borderRadius: "14px", height: "90px", animation: "pulse 1.5s infinite" }}></div>
-        <style>{`@keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }`}</style>
+      <div className="w-full bg-[#f5f5f5] p-3">
+        <div className="bg-white rounded-[16px] p-4 flex gap-3 items-center animate-pulse"><div className="w-[60px] h-[60px] rounded-full bg-[#f0f0f0]"></div><div className="flex-1"><div className="h-[18px] w-[120px] bg-[#f0f0f0] rounded mb-2"></div><div className="h-[12px] w-[180px] bg-[#f0f0f0] rounded"></div></div></div>
       </div>
     );
   }
@@ -239,9 +193,9 @@ export default function AccountDashboard() {
   const isLoggedIn = !!user;
 
   return (
-    <div className="daraz-mobile-root" style={{ width: "100%", background: "#f5f5f5", minHeight: "100vh", paddingBottom: "20px" }}>
-      {/* Mobile */}
-      <div className="daraz-mobile-only">
+    <div className="w-full bg-[#f5f5f5] overflow-x-hidden" style={{ minHeight: "auto", paddingBottom: "0px" }}>
+      {/* Mobile - FULL FUTURE - GAP FIXED */}
+      <div className="block lg:hidden w-full bg-[#f5f5f5]">
         <div style={{ background: isLoggedIn ? "linear-gradient(180deg, #ffe9e5 0%, #fff5f1 50%, #fff 100%)" : "#f8f8f8", padding: "16px 12px 14px 12px" }}>
           {isLoggedIn ? (
             <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
@@ -252,39 +206,8 @@ export default function AccountDashboard() {
                 <h2 style={{ margin: 0, fontSize: "20px", fontWeight: "900", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{displayName}</h2>
                 <p style={{ margin: "3px 0 0 0", fontSize: "12px", color: "#555" }}><b>{stats.wishlistCount}</b> Wishlist · <b>{cartCount}</b> Cart · <b>{vouchers}</b> Vouchers · 🪙 <b>{coins}</b></p>
               </div>
-              {/* ✅ FIXED: Beautiful iPhone Style Sidebar Icon - Fast 1 Click Open */}
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  e.preventDefault();
-                  window.dispatchEvent(new Event('toggleAccountSidebar'));
-                }}
-                style={{
-                  width: "40px",
-                  height: "40px",
-                  borderRadius: "12px",
-                  background: "rgba(255,255,255,0.92)",
-                  backdropFilter: "blur(12px)",
-                  WebkitBackdropFilter: "blur(12px)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  border: "1px solid rgba(0,0,0,0.06)",
-                  boxShadow: "0 2px 10px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.06)",
-                  cursor: "pointer",
-                  touchAction: "manipulation",
-                  flexShrink: 0,
-                  transition: "all 0.2s cubic-bezier(0.32,0.72,0,1)",
-                }}
-                onTouchStart={(e) => { e.currentTarget.style.transform = "scale(0.92)"; }}
-                onTouchEnd={(e) => { e.currentTarget.style.transform = "scale(1)"; }}
-                aria-label="Open Menu"
-              >
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1d1d1f" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="4" y1="6" x2="20" y2="6" />
-                  <line x1="4" y1="12" x2="20" y2="12" />
-                  <line x1="4" y1="18" x2="20" y2="18" />
-                </svg>
+              <button onClick={(e) => { e.stopPropagation(); e.preventDefault(); window.dispatchEvent(new Event('toggleAccountSidebar')); }} style={{ width: "40px", height: "40px", borderRadius: "12px", background: "rgba(255,255,255,0.92)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)", display: "flex", alignItems: "center", justifyContent: "center", border: "1px solid rgba(0,0,0,0.06)", boxShadow: "0 2px 10px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.06)", cursor: "pointer", touchAction: "manipulation", flexShrink: 0, transition: "all 0.2s cubic-bezier(0.32,0.72,0,1)" }} aria-label="Open Menu">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1d1d1f" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><line x1="4" y1="6" x2="20" y2="6" /><line x1="4" y1="12" x2="20" y2="12" /><line x1="4" y1="18" x2="20" y2="18" /></svg>
               </button>
             </div>
           ) : (
@@ -377,7 +300,7 @@ export default function AccountDashboard() {
           )}
         </div>
 
-        <div style={{ background: "white", marginTop: "8px", padding: "14px 0 18px 0" }}>
+        <div style={{ background: "white", marginTop: "8px", padding: "14px 0 14px 0" }}>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: "18px 0" }}>
             {[
               { icon: "🍬", label: "Baharaz Candy", link: "/baharaz-candy" },
@@ -398,8 +321,8 @@ export default function AccountDashboard() {
         </div>
       </div>
 
-      {/* Desktop */}
-      <div className="daraz-desktop-only" style={{ display: "flex", flexDirection: "column", gap: "14px", width: "100%", padding: "12px", boxSizing: "border-box" }}>
+      {/* Desktop - FIXED - No Cut - Full Width Inside 1188px Layout */}
+      <div className="hidden lg:flex flex-col gap-[14px] w-full max-w-full">
         <div style={{ background: "linear-gradient(135deg,#f85606 0%,#ff8a00 100%)", borderRadius: "18px", padding: "18px", color: "white", display: "flex", gap: "16px", alignItems: "center", boxShadow: "0 8px 24px rgba(248,86,6,0.25)" }}>
           <div style={{ width: "64px", height: "64px", borderRadius: "50%", background: "white", color: "#f85606", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "900", fontSize: "24px", overflow: "hidden", flexShrink: 0, border: "3px solid rgba(255,255,255,0.6)" }}>
             {avatarUrl && !imgError ? <img src={avatarUrl} alt={displayName} referrerPolicy="no-referrer" onError={() => setImgError(true)} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : displayName.charAt(0).toUpperCase()}
@@ -483,17 +406,6 @@ export default function AccountDashboard() {
           </div>
         </div>
       </div>
-
-      <style>{`
-        .daraz-mobile-only { display: none; }
-        .daraz-desktop-only { display: flex; }
-        @media (max-width: 900px) {
-          .daraz-mobile-only { display: block !important; }
-          .daraz-desktop-only { display: none !important; }
-          .daraz-mobile-root { background: #f5f5f5 !important; padding: 0 !important; }
-        }
-        * { box-sizing: border-box; }
-      `}</style>
     </div>
   );
 }

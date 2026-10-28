@@ -70,21 +70,30 @@ export default function RootLayout({ children }) {
   };
 
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning className="overflow-x-hidden">
       <head>
         <link rel="preconnect" href="https://baharaz.com" />
         <link rel="dns-prefetch" href="https://baharaz.com" />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       </head>
-      <body className="bg-[#f5f5f5] antialiased overflow-x-hidden min-h-screen w-full max-w-[100vw]" suppressHydrationWarning>
+      <body className="bg-[#f5f5f5] antialiased overflow-x-hidden min-h-screen w-full max-w-full m-0 p-0 mt-0 pt-0" suppressHydrationWarning>
         <ClientShellWrapper>
-          <div className="w-full min-h-screen bg-[#f5f5f5] relative z-0 overflow-x-hidden">
-            <div className="w-full max-w-[1188px] mx-auto px-0 md:px-2">
+          <div className="w-full min-h-screen bg-[#f5f5f5] relative z-0 overflow-x-hidden m-0 p-0 mt-0 pt-0">
+            <div className="w-full max-w-full mx-auto px-0 m-0 mt-0 pt-0">
               {children}
             </div>
           </div>
         </ClientShellWrapper>
-        <style>{`html,body{max-width:100vw; overflow-x:hidden;} @media(max-width:768px){.w-full{padding-left:0!important; padding-right:0!important;}}`}</style>
+        <style>{`
+          html,body{max-width:100%; overflow-x:hidden; margin:0 !important; padding:0 !important; background:#f5f5f5;}
+          *{box-sizing:border-box;}
+          /* HEADER আর BANNER এর মাঝের সাদা 112px গ্যাপ বন্ধ */
+          div.hidden.md\\:block.w-full.shrink-0.bg-\\[\\#F5F5F5\\] {
+            display: none !important;
+            height: 0 !important;
+          }
+          main { padding-top: 0 !important; margin-top: 0 !important; }
+        `}</style>
       </body>
     </html>
   );
